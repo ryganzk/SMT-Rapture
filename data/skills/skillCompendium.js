@@ -73,32 +73,65 @@ import {skillLinks} from "./skillLinks.js"
  *   2: SKILLS THAT RAISE ACCURACY/EVASION
  *   3: DEKUNDA
  *   4: DEKAJA
- *   5: SKILLS REGARDING PHYSICAL SKILLS
- *   6: SKILLS REGARDING FIRE SKILLS
- *   7: SKILLS REGARDING ICE SKILLS
- *   8: SKILLS REGARDING ELECTRIC SKILLS
- *   9: SKILLS REGARDING FORCE SKILLS
- *   10: SKILLS REGARDING LIGHT SKILLS
- *   11: SKILLS REGARDING DARK SKILLS
- *   12: SKILLS REGARDING ALMIGHTY SKILLS
- *   13: SKILLS REGARDING RECOVERY SKILLS
- *   14: SKILLS THAT RAISE MAX HP
- *   15: SKILLS THAT RAISE MAX MP
- *   16: SKILLS THAT RAISE ACCURACY
- *   17: SKILLS THAT RAISE POISON CHANCE
- *   18: SKILLS THAT INCREASE CRIT RATE
- *   19: SKILLS THAT INCREASE CRIT DAMAGE
- *   20: SKILLS THAT PROTECT FROM FATAL ATTACKS
- *   21: SKILLS THAT PROTECT FROM AILMENTS
- *   22: SKILLS THAT RESTORE HP AFTER ATTACKS
- *   23: SKILLS THAT RESTORE MP AFTER ATTACKS
- *   24: SKILLS THAT RESTORE MP AFTER CAUSING AILMENTS
- *   25: SKILLS THAT CAN COUNTER PHYSICALLY AFTER ATTACKS
- *   26: SAFEGUARD
- *   27: CRITICAL ZEALOT
- *   28: BOON BOOST
- *   29: HEAVENLY COUNTER
+ *   5: REVIVAL CHANT
  *
+ *********************************************************************************/
+
+/*********************************************************************************
+ *                 PASSIVE SKILL TYPE IDS
+ *   ----------------------------------------------------
+ *   0: LIFE SPRING
+ *   1: MANA SPRING
+ *   2: LIFE AID
+ *   3: MANA AID
+ *   4: PHYSICAL SKILLS
+ *   5: FIRE SKILLS
+ *   6: ICE SKILLS
+ *   7: ELECTRIC SKILLS
+ *   8: FORCE SKILLS
+ *   9: LIGHT SKILLS
+ *   10: DARK SKILLS
+ *   11: ALMIGHTY SKILLS
+ *   12: HEAL
+ *   13: MASK
+ *   14: RESTORE
+ *   15: CURSE SIPHON
+ *   16: COUNTER
+ *   17: EYE
+ *   18: GLEE
+ *   19: POISON
+ *   20: BOON BOOST
+ *   21: ENDURE
+ *   22: SAFEGUARD
+ *   23: CRITICAL ZEALOT
+ *   24: HEAVENLY COUNTER
+ *
+ *********************************************************************************/
+
+/*********************************************************************************
+ *                   CHARGE IDS
+ *   ----------------------------------------------------
+ *   0: CHARGE
+ *   1: CONCENTRATE
+ *   2: CRITICAL AURA
+ *   3: IMPALER'S ANIMUS
+ *   4: BOWL OF HYGIEIA
+ * 
+ *********************************************************************************/
+
+/*********************************************************************************
+ *                   BLOCK IDS
+ *   ----------------------------------------------------
+ *   0: TETRAKARN
+ *   1: MAKARAKARN
+ *   2: PHYS BLOCK
+ *   3: FIRE BLOCK
+ *   4: ICE BLOCK
+ *   5: ELEC BLOCK
+ *   6: FORCE BLOCK
+ *   7: LIGHT BLOCK
+ *   8: DARK BLOCK
+ * 
  *********************************************************************************/
 
 /*********************************************************************************

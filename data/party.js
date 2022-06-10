@@ -59,8 +59,7 @@ export class Party {
                 demon.skills[i] = skillCompendium.getSkill(demon.skills[i])
             }
             
-            demon.boosts = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-            demon.blocks = [0, 0, 0, 0, 0, 0, 0]
+            demon.boosts = [0, 0, 0, 0]
             demon.taunt = 0
 
             this.actors.push(demon)
