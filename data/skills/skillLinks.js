@@ -240,7 +240,7 @@ export const skillLinks = [
     JSON.parse(await fsPromises.readFile("./data/skills/support/marakunda.json")),
     JSON.parse(await fsPromises.readFile("./data/skills/support/masukunda.json")),
     JSON.parse(await fsPromises.readFile("./data/skills/support/debilitate.json")),
-    JSON.parse(await fsPromises.readFile("./data/skills/support/cautiouscheer.json")),
+    JSON.parse(await fsPromises.readFile("./data/skills/support/cautiousCheer.json")),
     JSON.parse(await fsPromises.readFile("./data/skills/support/dekaja.json")),
     JSON.parse(await fsPromises.readFile("./data/skills/support/dekunda.json")),
     JSON.parse(await fsPromises.readFile("./data/skills/support/charge.json")),

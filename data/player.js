@@ -7,45 +7,57 @@
  * @version 1.0
  *********************************************************************************/
 
-import fsPromises from 'fs/promises'
+import {PlayerCompendium} from "./demons/playerCompendium.js"
 import {SkillCompendium} from "./skills/skillCompendium.js"
+import {determinePotentials} from "./skills/potentialCalculator.js"
 const skillCompendium = new SkillCompendium()
 
-let player = JSON.parse(await fsPromises.readFile("./data/demons/player/player.json"))
+let playerCompendium = new PlayerCompendium()
  
 export class Player {
-    constructor(name, statMods, skills) {
+    constructor(name, id, statMods, skills) {
         try {
+            let player = JSON.parse(JSON.stringify(playerCompendium.getPlayer(id)));
+
             if (statMods[1] + statMods[2] > (statMods[0] - player.level) * 6
             || statMods[3] + statMods[4] + statMods[5] + statMods[6] + statMods[7]
             > (statMods[0] - player.level) * 4)
                 throw `Too many stats have been pumped into ${player.name}!`
 
             player.level = statMods[0]
-            player.stats.hp += statMods[1]
-            player.stats.mp += statMods[2]
-            player.stats.strength += statMods[3]
-            player.stats.vitality += statMods[4]
-            player.stats.magic += statMods[5]
-            player.stats.agility += statMods[6]
-            player.stats.luck += statMods[7]
+            player.baseStats.hp += statMods[1]
+            player.baseStats.mp += statMods[2]
+            player.baseStats.strength += statMods[3]
+            player.baseStats.vitality += statMods[4]
+            player.baseStats.magic += statMods[5]
+            player.baseStats.agility += statMods[6]
+            player.baseStats.luck += statMods[7]
+
+            let battleStats = {
+                battleStats: {
+                    hp: player.baseStats.hp,
+                    mp: player.baseStats.mp
+                }
+            }
+
+            Object.assign(player, battleStats)
 
             if(skills.length != 0) 
                 player.skills = skills
             
             for(let i = 0; i < player.skills.length; i++) {
                 player.skills[i] = skillCompendium.getSkill(player.skills[i])
+                determinePotentials(player.potentials, player.skills[i])
             }
             
-            player.boosts = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-            player.blocks = [0, 0, 0, 0, 0, 0, 0]
-            player.taunt = 0
+            player.boosts = [0, 0, 0, 0]
+            player.guard = 0
+
+            player.name = name
+            this.player = player
         }
         catch (err) {
             console.log(err)
         }
-
-        player.name = name
-        this.player = player;
     }
 }

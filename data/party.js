@@ -9,6 +9,7 @@
  *********************************************************************************/
 
 import {SkillCompendium} from "./skills/skillCompendium.js"
+import {determinePotentials} from "./skills/potentialCalculator.js"
 const skillCompendium = new SkillCompendium()
 
 export class Party {
@@ -22,19 +23,18 @@ export class Party {
     constructor(player) {
         this.player = Object.values(player)[0]
         this.actors = []
-        this.activeDemons = [0, 1, 2]
         this.items = []
     }
 
     /*****************************************************************************
-      * Takes in a demon element, modifies stats based on the demon's level, gives
+      * Takes in a demon element, modifies baseStats based on the demon's level, gives
       * the wanted skills to the demon, and adds it as an actor to the party
       * 
       * @method
       * @param {Demon} demon
       * @param {int[8]} statMods
       * @param {Skill[8]} skills
-      * @throws If the player wants to add more stats than the demon's level allows
+      * @throws If the player wants to add more baseStats than the demon's level allows
       *****************************************************************************/
     pushNewActor(demon, statMods, skills) {
         try {
@@ -44,23 +44,33 @@ export class Party {
                 throw `Too many stats have been pumped into ${demon.name}!`
 
             demon.level = statMods[0]
-            demon.stats.hp += statMods[1]
-            demon.stats.mp += statMods[2]
-            demon.stats.strength += statMods[3]
-            demon.stats.vitality += statMods[4]
-            demon.stats.magic += statMods[5]
-            demon.stats.agility += statMods[6]
-            demon.stats.luck += statMods[7]
+            demon.baseStats.hp += statMods[1]
+            demon.baseStats.mp += statMods[2]
+            demon.baseStats.strength += statMods[3]
+            demon.baseStats.vitality += statMods[4]
+            demon.baseStats.magic += statMods[5]
+            demon.baseStats.agility += statMods[6]
+            demon.baseStats.luck += statMods[7]
+
+            let battleStats = {
+                battleStats: {
+                    hp: demon.baseStats.hp,
+                    mp: demon.baseStats.mp
+                }
+            }
+
+            Object.assign(demon, battleStats)
 
             if(skills.length != 0) 
                 demon.skills = skills
             
             for(let i = 0; i < demon.skills.length; i++) {
                 demon.skills[i] = skillCompendium.getSkill(demon.skills[i])
+                determinePotentials(demon.potentials, demon.skills[i])
             }
             
             demon.boosts = [0, 0, 0, 0]
-            demon.taunt = 0
+            demon.guard = 0
 
             this.actors.push(demon)
         }
@@ -104,5 +114,9 @@ export class Party {
         console.log(this.actors)
         console.log(`\nITEMS\n`)
         console.log(this.items)
+    }
+
+    displayDemon(id) {
+        console.log(this.actors[id])
     }
 }

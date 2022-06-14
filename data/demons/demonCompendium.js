@@ -115,6 +115,7 @@
       * @returns {Demon} 
       *****************************************************************************/
       getDemon(demonID) {
-        return this.demons[demonID]
+        let demon = this.demons[demonID]
+        return JSON.parse(JSON.stringify(demon))
     }
- }
+}
