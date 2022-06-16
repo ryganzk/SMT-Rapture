@@ -99,6 +99,7 @@ export class Party {
       *****************************************************************************/
     addItem(item, amount) {
         item.amount = amount
+        item.skill = skillCompendium.getSkill(item.skill)
         this.items.push(item)
     }
 
