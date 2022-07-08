@@ -83,16 +83,21 @@
  *   24: WICCAN
  *   25: EGYPTIAN
  *   26: AZTEC
- *   27: NORSE
- *   28: LOVECRAFTIAN
- *   29: SLAVIC
- *   30: BALINESE
- *   31: SEMITIC
- *   32: CANAANITE
- *   33: VEDIC
- *   34: SRI LANKAN
- *   35: ARABIAN
- *   36: SUMERIAN
+ *   27: ULIGER
+ *   28: NORSE
+ *   29: MODERN FICTION
+ *   30: LOVECRAFTIAN
+ *   31: HISTORICAL FIGURES
+ *   32: SUMERIAN
+ *   33: CANAANITE
+ *   34: SEMITIC
+ *   35: SLAVIC
+ *   36: GNOSTIC
+ *   37: BALINESE
+ *   38: BABYLONIAN
+ *   39: VEDIC
+ *   40: SRI LANKAN
+ *   41: ARABIAN
  * 
  *********************************************************************************/
  

@@ -1,0 +1,50 @@
+{
+    "name": "Legion",
+    "desc": "A demon or horde of demons quoted as saying, \"For we are many\" in the New Testament. The name comes from the Roman military term for an army unit of 3,000 to 6,000 men.",
+    "race": 13,
+    "demID": 33,
+    "religion": [9],
+    "alignment": [2, 2],
+    "level": 19,
+    "baseStats": {
+        "hp": 100,
+        "mp": 93,
+        "strength": 15,
+        "vitality": 18,
+        "magic": 16,
+        "agility": 14,
+        "luck": 15
+    },
+    "baseSkills": [150],
+    "levelSkills": [[11, 20], [188, 21], [299, 22]],
+    "resistances": {
+        "physical": 1,
+        "fire": 1,
+        "ice": 1,
+        "electric": 0,
+        "force": 1,
+        "light": 0,
+        "dark": 3
+    },
+    "ailmentResistances": {
+        "poison": 1,
+        "confusion": 1,
+        "charm": 1,
+        "seal": 1,
+        "sleep": 1,
+        "mirage": 1
+    },
+    "potentials": {
+        "physical": 0,
+        "fire": 0,
+        "ice": 0,
+        "electric": 0,
+        "force": 0,
+        "light": -3,
+        "dark": 2,
+        "almighty": 0,
+        "ailment": 2,
+        "heal": -1,
+        "support": 0
+    }
+}
