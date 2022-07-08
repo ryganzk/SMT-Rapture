@@ -1,0 +1,50 @@
+{
+    "name": "Black Ooze",
+    "desc": "An amoeba-like monster that attacks and eats people. Supposedly, it is actually a demon that failed to take form and now roams in search of Magatsushi. It is said that when a Slime's ability to absorb Magatsuhi goes out of control, it transforms into a Black Ooze.",
+    "race": 13,
+    "demID": 72,
+    "religion": [1],
+    "alignment": [2, 2],
+    "level": 33,
+    "baseStats": {
+        "hp": 217,
+        "mp": 119,
+        "strength": 23,
+        "vitality": 35,
+        "magic": 21,
+        "agility": 15,
+        "luck": 23
+    },
+    "baseSkills": [195, 167],
+    "levelSkills": [[192, 34], [1, 35], [270, 36]],
+    "resistances": {
+        "physical": 2,
+        "fire": 0,
+        "ice": 1,
+        "electric": 1,
+        "force": 1,
+        "light": 0,
+        "dark": 1
+    },
+    "ailmentResistances": {
+        "poison": 1,
+        "confusion": 0,
+        "charm": 0,
+        "seal": 1,
+        "sleep": 1,
+        "mirage": 0
+    },
+    "potentials": {
+        "physical": 2,
+        "fire": -2,
+        "ice": 0,
+        "electric": 0,
+        "force": 0,
+        "light": -2,
+        "dark": 0,
+        "almighty": 2,
+        "ailment": 6,
+        "heal": -3,
+        "support": 0
+    }
+}

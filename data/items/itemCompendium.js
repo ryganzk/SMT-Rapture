@@ -30,6 +30,7 @@
       * @returns {Item} 
       *****************************************************************************/
       getItem(itemID) {
-        return this.items[itemID]
+        let item = this.items[itemID]
+        return JSON.parse(JSON.stringify(item))
     }
  }

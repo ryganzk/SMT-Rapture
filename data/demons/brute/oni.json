@@ -1,0 +1,50 @@
+{
+    "name": "Oni",
+    "desc": "A common demon in Japanese mythology. This terrifying and powerful creature is known to raid human villages for food, riches, and women. It is characterized by red skin, horns on its head, long claws, and sharp fangs.",
+    "race": 3,
+    "demID": 43,
+    "religion": [5],
+    "alignment": [1, 2],
+    "level": 23,
+    "baseStats": {
+        "hp": 151,
+        "mp": 93,
+        "strength": 21,
+        "vitality": 24,
+        "magic": 12,
+        "agility": 12,
+        "luck": 16
+    },
+    "baseSkills": [16, 23],
+    "levelSkills": [[255, 24], [13, 25]],
+    "resistances": {
+        "physical": 2,
+        "fire": 1,
+        "ice": 1,
+        "electric": 0,
+        "force": 1,
+        "light": 0,
+        "dark": 1
+    },
+    "ailmentResistances": {
+        "poison": 1,
+        "confusion": 0,
+        "charm": 1,
+        "seal": 1,
+        "sleep": 0,
+        "mirage": 1
+    },
+    "potentials": {
+        "physical": 3,
+        "fire": 0,
+        "ice": 0,
+        "electric": -2,
+        "force": 0,
+        "light": 0,
+        "dark": 0,
+        "almighty": 0,
+        "ailment": 0,
+        "heal": -1,
+        "support": 0
+    }
+}

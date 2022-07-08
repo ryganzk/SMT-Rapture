@@ -1,0 +1,50 @@
+{
+    "name": "Kelpie",
+    "desc": "A fairy of Celtic folklore that lives by the water and takes the appearance of a horse. They often drown those who attempt to ride them, but, if tamed, they can be valuable mounts.",
+    "race": 9,
+    "demID": 63,
+    "religion": [10, 16],
+    "alignment": [1, 1],
+    "level": 30,
+    "baseStats": {
+        "hp": 136,
+        "mp": 153,
+        "strength": 20,
+        "vitality": 21,
+        "magic": 19,
+        "agility": 29,
+        "luck": 24
+    },
+    "baseSkills": [11, 202, 334],
+    "levelSkills": [[184, 31], [233, 32], [270, 33]],
+    "resistances": {
+        "physical": 1,
+        "fire": 1,
+        "ice": 2,
+        "electric": 1,
+        "force": 0,
+        "light": 1,
+        "dark": 1
+    },
+    "ailmentResistances": {
+        "poison": 1,
+        "confusion": 1,
+        "charm": 1,
+        "seal": 1,
+        "sleep": 1,
+        "mirage": 3
+    },
+    "potentials": {
+        "physical": 0,
+        "fire": 0,
+        "ice": 0,
+        "electric": 0,
+        "force": -3,
+        "light": 0,
+        "dark": 0,
+        "almighty": 0,
+        "ailment": 0,
+        "heal": 3,
+        "support": 1
+    }
+}

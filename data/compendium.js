@@ -11,6 +11,7 @@
 import {DemonCompendium} from "./demons/demonCompendium.js"
 import {SkillCompendium} from "./skills/skillCompendium.js"
 import {ItemCompendium} from "./items/itemCompendium.js"
+import {RulesetCompendium} from "./rulesets/rulesetCompendium.js"
 
 export class Compendium {
 
@@ -23,6 +24,7 @@ export class Compendium {
         this.demonComp = new DemonCompendium()
         this.skillComp = new SkillCompendium()
         this.itemComp = new ItemCompendium()
+        this.rulesetComp = new RulesetCompendium()
     }
 
     /*****************************************************************************
@@ -54,7 +56,18 @@ export class Compendium {
       * @param {int} itemID
       * @returns {Item} 
       *****************************************************************************/
-     getItem(itemID) {
-        return this.itemComp.getItem(itemID)
+    getItem(itemID) {
+      return this.itemComp.getItem(itemID)
+    }
+
+    /*****************************************************************************
+      * Returns the ruleset with the corresponding ID
+      * 
+      * @method
+      * @param {int} rulesetID
+      * @returns {Ruleset} 
+      *****************************************************************************/
+     getRuleset(rulesetID) {
+      return this.rulesetComp.getRuleset(rulesetID)
     }
 }

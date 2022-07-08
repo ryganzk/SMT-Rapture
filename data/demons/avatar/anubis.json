@@ -1,0 +1,50 @@
+{
+    "name": "Anubis",
+    "desc": "The jackal-headed god of the dead and embalming from Egyptian myth. He weighs the hearts of the dead to determine their final destination. He is also said to govern the technique of mummification.",
+    "race": 0,
+    "demID": 100,
+    "religion": [25],
+    "alignment": [0, 1],
+    "level": 41,
+    "baseStats": {
+        "hp": 184,
+        "mp": 240,
+        "strength": 15,
+        "vitality": 22,
+        "magic": 45,
+        "agility": 31,
+        "luck": 34
+    },
+    "baseSkills": [144, 151, 247],
+    "levelSkills": [[142, 42], [241, 43], [253, 44]],
+    "resistances": {
+        "physical": 1,
+        "fire": 1,
+        "ice": 1,
+        "electric": 1,
+        "force": 0,
+        "light": 3,
+        "dark": 2
+    },
+    "ailmentResistances": {
+        "poison": 1,
+        "confusion": 1,
+        "charm": 1,
+        "seal": 2,
+        "sleep": 1,
+        "mirage": 1
+    },
+    "potentials": {
+        "physical": -3,
+        "fire": 0,
+        "ice": 0,
+        "electric": 0,
+        "force": -3,
+        "light": 4,
+        "dark": 4,
+        "almighty": 0,
+        "ailment": 0,
+        "heal": 1,
+        "support": 0
+    }
+}
