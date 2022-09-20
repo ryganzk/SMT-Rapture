@@ -1,0 +1,50 @@
+{
+    "name": "Shiki-Ouji",
+    "desc": "A powerful creature often summoned by Japanese sorcerers called onmyoji. They are used both to hurt and to heal, but their true nature is said to be very violent.",
+    "race": 3,
+    "demID": 60,
+    "religion": [5],
+    "alignment": [1, 2],
+    "level": 29,
+    "baseStats": {
+        "hp": 135,
+        "mp": 159,
+        "strength": 16,
+        "vitality": 18,
+        "magic": 29,
+        "agility": 23,
+        "luck": 23
+    },
+    "baseSkills": [141, 150],
+    "levelSkills": [[188, 30], [144, 31]],
+    "resistances": {
+        "physical": 2,
+        "fire": 0,
+        "ice": 1,
+        "electric": 1,
+        "force": 0,
+        "light": 2,
+        "dark": 2
+    },
+    "ailmentResistances": {
+        "poison": 1,
+        "confusion": 0,
+        "charm": 1,
+        "seal": 1,
+        "sleep": 1,
+        "mirage": 1
+    },
+    "potentials": {
+        "physical": 0,
+        "fire": -5,
+        "ice": 0,
+        "electric": 0,
+        "force": 0,
+        "light": 2,
+        "dark": 2,
+        "almighty": 0,
+        "ailment": 1,
+        "heal": 0,
+        "support": 0
+    }
+}

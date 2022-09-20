@@ -1,0 +1,50 @@
+{
+    "name": "Mermaid",
+    "desc": "Half-woman, half-fish inhabitant of the ocean. Males are called mermen. Mermaids are regarded as unlucky omens by many fishermen, often foretelling severe storms or poor catches. Legend says they use their voices to charm men, causing them to crash their ships.",
+    "race": 11,
+    "demID": 16,
+    "religion": [2, 7],
+    "alignment": [1, 2],
+    "level": 12,
+    "baseStats": {
+        "hp": 72,
+        "mp": 122,
+        "strength": 8,
+        "vitality": 9,
+        "magic": 17,
+        "agility": 11,
+        "luck": 15
+    },
+    "baseSkills": [103],
+    "levelSkills": [[183, 13], [185, 14], [222, 15]],
+    "resistances": {
+        "physical": 1,
+        "fire": 0,
+        "ice": 3,
+        "electric": 0,
+        "force": 1,
+        "light": 1,
+        "dark": 1
+    },
+    "ailmentResistances": {
+        "poison": 1,
+        "confusion": 1,
+        "charm": 1,
+        "seal": 1,
+        "sleep": 2,
+        "mirage": 1
+    },
+    "potentials": {
+        "physical": -2,
+        "fire": -2,
+        "ice": 3,
+        "electric": 0,
+        "force": 0,
+        "light": 0,
+        "dark": 0,
+        "almighty": 0,
+        "ailment": 3,
+        "heal": 0,
+        "support": 2
+    }
+}

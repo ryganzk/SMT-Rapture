@@ -1,0 +1,50 @@
+{
+    "name": "Sandman",
+    "desc": "A faerie from rural Germany, rumored to put people to sleep using the magic sand he carried in his bag. If a victim resisted, he would sit on their eyelids to force them to sleep.",
+    "race": 26,
+    "demID": 9,
+    "religion": [7],
+    "alignment": [1, 2],
+    "level": 8,
+    "baseStats": {
+        "hp": 55,
+        "mp": 81,
+        "strength": 9,
+        "vitality": 8,
+        "magic": 9,
+        "agility": 11,
+        "luck": 12
+    },
+    "baseSkills": [4],
+    "levelSkills": [[91, 9], [126, 10], [130, 1]],
+    "resistances": {
+        "physical": 1,
+        "fire": 1,
+        "ice": 1,
+        "electric": 0,
+        "force": 2,
+        "light": 1,
+        "dark": 1
+    },
+    "ailmentResistances": {
+        "poison": 1,
+        "confusion": 1,
+        "charm": 1,
+        "seal": 1,
+        "sleep": 3,
+        "mirage": 1
+    },
+    "potentials": {
+        "physical": 1,
+        "fire": 0,
+        "ice": 0,
+        "electric": -3,
+        "force": 1,
+        "light": 0,
+        "dark": 0,
+        "almighty": 0,
+        "ailment": 3,
+        "heal": 0,
+        "support": -1
+    }
+}
