@@ -6,7 +6,8 @@ using static GameManager;
 public class ActorStats : MonoBehaviour
 {
     public TextAsset statSheet;
-    
+    public Stats stats;
+
     [System.Serializable]
     public class BaseStats
     {
@@ -83,13 +84,12 @@ public class ActorStats : MonoBehaviour
         public BaseStats baseStats;
         public int[] baseSkills;
         public int[] levelSkills;
+        [SerializeReference]
         public List<Skill> skills;
         public Resistances resistances;
         public AilmentResistances ailmentResistances;
         public Potentials potentials;
     }
-
-    public Stats stats = new Stats();
 
     // Start is called before the first frame update
     void Start()

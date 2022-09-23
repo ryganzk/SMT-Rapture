@@ -6,11 +6,13 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public GameObject player;
+    public GameObject active;
     public Text actionCommand;
     public GameObject playerTeam, opponentTeam;
+    public Animator cameraAnimator;
 
-    public Skill[] skillCompendium;
+    [SerializeReference]
+    public List<Skill> skillCompendium;
 
     [System.Serializable]
     public class Skill
@@ -72,7 +74,7 @@ public class GameManager : MonoBehaviour
 
     void ReadCompendiums()
     {
-        skillCompendium = new Skill[] {
+        skillCompendium = new List<Skill> {
             JsonUtility.FromJson<AttackSkill>((Resources.Load("Skills/physical/lunge") as TextAsset).text),
             JsonUtility.FromJson<AttackSkill>((Resources.Load("Skills/physical/bestialBite") as TextAsset).text),
             JsonUtility.FromJson<AttackSkill>((Resources.Load("Skills/physical/hellishSlash") as TextAsset).text),
@@ -411,17 +413,34 @@ public class GameManager : MonoBehaviour
         };
     }
 
+    public void BackToSideView()
+    {
+        cameraAnimator.Play("BackToSideView");
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        actionCommand.text = "WHAT WILL " + player.GetComponent<ActorStats>().stats.name + " DO?";
+        actionCommand.text = "WHAT WILL " + active.GetComponent<ActorStats>().stats.name + " DO?";
         ReadCompendiums();
-        
-        Transform[] ts = playerTeam.GetComponentsInChildren<Transform>();
 
-        foreach (Transform t in ts)
+        foreach (Transform child in playerTeam.transform)
         {
-            print(t.name);
+            var childStats = child.GetComponent<ActorStats>().stats;
+            foreach (int skillID in childStats.baseSkills)
+            {
+                childStats.skills.Add(skillCompendium[skillID]);
+            }
+            childStats.skills.Add(JsonUtility.FromJson<SupportSkill>((Resources.Load("Skills/support/tarunda") as TextAsset).text));
+        }
+
+        foreach (Transform child in opponentTeam.transform)
+        {
+            var childStats = child.GetComponent<ActorStats>().stats;
+            foreach (int skillID in childStats.baseSkills)
+            {
+                childStats.skills.Add(skillCompendium[skillID]);
+            }
         }
     }
 
