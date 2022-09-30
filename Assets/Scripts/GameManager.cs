@@ -6,6 +6,11 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    public const int ATTACK_ID = 182;
+    private const int AILMENT_ID = 200;
+    private const int RECOVERY_ID = 220;
+    private const int SUPPORT_ID = 258;
+
     public GameObject active;
     public Text actionCommand;
     public GameObject playerTeam, opponentTeam;
@@ -416,6 +421,21 @@ public class GameManager : MonoBehaviour
     public void BackToSideView()
     {
         cameraAnimator.Play("BackToSideView");
+    }
+
+    public int DetermineSkillType(Skill skill)
+    {
+        switch (skill.skillID)
+        {
+            case int id when (id <= ATTACK_ID):
+                return 0;
+            case int id when (id <= AILMENT_ID):
+                return 1;
+            case int id when (id <= RECOVERY_ID):
+                return 2;
+            default:
+                return 3;
+        }
     }
 
     // Start is called before the first frame update

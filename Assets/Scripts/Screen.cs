@@ -7,6 +7,7 @@ public class Screen : MonoBehaviour
 {
     public GameObject pressTurns;
     public Image pressTurnIcon;
+    public Canvas entityScreen;
 
     // Start is called before the first frame update
     void Start()
