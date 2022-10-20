@@ -17,15 +17,33 @@ public class EntityScreen : MonoBehaviour
     
     public void UpdateSelectButtons()
     {
-        foreach (Transform obj in gameManager.opponentTeam.transform)
+        foreach (Transform child in transform)
         {
-            var button = Instantiate(selectButton, obj.transform.position, Quaternion.identity);
-            button.transform.SetParent(this.transform);
-            button.GetComponent<EntityHUD>().lookAt = obj;
-            button.onClick.AddListener(OnSelectButtonPress);
+            Destroy(child.gameObject);
+        }
+
+        Team team;
+        if (gameManager.GetComponent<GameManager>().DetermineSkillType(selectedSkill) < 2)
+            team = gameManager.opponentTeam.GetComponent<Team>();
+        else
+            team = gameManager.playerTeam.GetComponent<Team>();
+
+
+        CreateSelectButton(team.player);
+        foreach (GameObject obj in team.activeDemons)
+        {
+            CreateSelectButton(obj);
         }
 
         CreateBackButton();
+    }
+
+    void CreateSelectButton(GameObject obj)
+    {
+        var button = Instantiate(selectButton, obj.transform.position, Quaternion.identity);
+        button.transform.SetParent(this.transform);
+        button.GetComponent<EntityHUD>().lookAt = obj.transform;
+        button.onClick.AddListener(OnSelectButtonPress);
     }
 
     void OnSelectButtonPress()
@@ -38,15 +56,16 @@ public class EntityScreen : MonoBehaviour
         {
             case 0:
             case 1:
-                gameManager.active.GetComponent<Animator>().Play("NahobinoSkillAtk");
+                gameManager.active.GetComponent<Animator>().SetTrigger("skillAtk");
                 break;
             case 2:
             case 3:
-                gameManager.active.transform.Rotate(0, 90, 0);
-                gameManager.active.GetComponent<Animator>().Play("NahobinoSkillRcv");
+                gameManager.active.GetComponent<Animator>().SetTrigger("skillRcv");
                 break;
 
         }
+
+        gameManager.GetComponent<GameManager>().NextUp(1);
     }
 
     void CreateBackButton()
@@ -65,6 +84,10 @@ public class EntityScreen : MonoBehaviour
     {
         skillScreen.enabled = true;
         GetComponent<Canvas>().enabled = false;
-        gameManager.cameraAnimator.Play("EnemyToSideView");
+        
+        if (gameManager.GetComponent<GameManager>().DetermineSkillType(selectedSkill) < 2)
+            gameManager.cameraAnimator.Play("EnemyToSideView");
+        else
+            gameManager.cameraAnimator.Play("AllyToSideView");
     }
 }

@@ -5,12 +5,14 @@ using UnityEngine;
 public class Team : MonoBehaviour
 {
     public GameObject player;
+    public List<GameObject> activeDemons;
     public GameObject[] demons;
+    public bool homeTeam;
     
     // Start is called before the first frame update
     void Start()
     {
-        demons = new GameObject[12];
+
     }
 
     // Update is called once per frame

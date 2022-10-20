@@ -7,6 +7,8 @@ public class ActorStats : MonoBehaviour
 {
     public TextAsset statSheet;
     public Stats stats;
+    public Sprite faceSprite;
+    public bool guard;
 
     [System.Serializable]
     public class BaseStats
@@ -91,8 +93,7 @@ public class ActorStats : MonoBehaviour
         public Potentials potentials;
     }
 
-    // Start is called before the first frame update
-    void Start()
+    public void LoadCharacter()
     {
         stats = JsonUtility.FromJson<Stats>(statSheet.text);
     }

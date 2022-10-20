@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -6,15 +7,19 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public const int ATTACK_ID = 182;
+    private const int ATTACK_ID = 182;
     private const int AILMENT_ID = 200;
     private const int RECOVERY_ID = 220;
     private const int SUPPORT_ID = 258;
+    private int turn = 1;
 
     public GameObject active;
     public Text actionCommand;
     public GameObject playerTeam, opponentTeam;
     public Animator cameraAnimator;
+    public GameObject screen;
+    public Image pressTurnIcon;
+    public Sprite glowingPressTurnIcon;
 
     [SerializeReference]
     public List<Skill> skillCompendium;
@@ -438,30 +443,204 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void Guard()
+    {
+        active.GetComponent<Animator>().SetTrigger("guardStart");
+        active.GetComponent<ActorStats>().guard = true;
+        NextUp(1);
+    }
+
+    public void GuardEnd()
+    {
+        active.GetComponent<Animator>().SetTrigger("guardEnd");
+        active.GetComponent<ActorStats>().guard = false;
+    }
+
+    public void NextUp(int val)
+    {
+        var team = playerTeam.GetComponent<Team>();
+        if (active == team.player)
+        {
+            active = team.activeDemons[0];
+        }
+        else
+        {
+            active = team.player;
+        }
+
+        UpdatePress(val);
+        UpdateName();
+
+        if (active.GetComponent<ActorStats>().guard)
+        {
+            GuardEnd();
+        }
+    }
+
+    public void ChangeDemons(GameObject demon)
+    {
+        var temp = active;
+        demon.SetActive(true);
+        active.SetActive(false);
+
+        var team = GetComponent<GameManager>().playerTeam.GetComponent<Team>().activeDemons;
+        team[team.IndexOf(active)] = demon;
+
+        demon.transform.position = active.transform.position;
+        demon.transform.rotation = active.transform.rotation;
+        active = demon;
+
+        NextUp(0);
+    }
+
+    public void SwitchTeams()
+    {
+        var temp = playerTeam;
+        playerTeam = opponentTeam;
+        opponentTeam = temp;
+
+        if (playerTeam.GetComponent<Team>().homeTeam)
+        {
+            screen.transform.Find("Turn").GetComponent<Text>().text = "Ally Turn";
+            ++turn;
+            screen.transform.Find("TurnNumber").GetComponent<Text>().text = turn.ToString();
+        }
+        else
+            screen.transform.Find("Turn").GetComponent<Text>().text = "Enemy Turn";
+    }
+
+    public void CreatePartyTurns()
+    {
+        Transform pressTurnPane = screen.transform.Find("PressTurns");
+
+        Color glow;
+        if (playerTeam.GetComponent<Team>().homeTeam)
+            glow = Color.cyan;
+        else
+            glow = Color.red;
+
+        for (int i = 0; i < playerTeam.GetComponent<Team>().activeDemons.Count + 1; ++i)
+        {
+
+            CreatePressTurn(i, pressTurnPane, glow);
+        }
+    }
+
+    void CreatePressTurn(int offset, Transform pressTurnPane, Color glow)
+    {
+        var pressTurn = Instantiate(pressTurnIcon, Vector3.zero, Quaternion.identity) as Image;
+        pressTurn.transform.SetParent(pressTurnPane.transform);
+        pressTurn.color = glow;
+        var rectTransform = pressTurn.GetComponent<RectTransform>();
+        rectTransform.anchoredPosition = new Vector2(1, 0);
+        rectTransform.position = new Vector3(1830 - (100 * offset), 990, 0);
+    }
+
+    public void UpdatePress(int val)
+    {
+        Transform pressTurnPane = screen.transform.Find("PressTurns");
+        switch (val)
+        {
+            //WEAK, PASS, CHANGE
+            case 0:
+                ExtraTurn(pressTurnPane);
+                break;
+            //NORMAL, RESIST, GUARD
+            case 1:
+                DeleteTurns(1, pressTurnPane);
+                break;
+            //MISS, NULL
+            case 2:
+                DeleteTurns(2, pressTurnPane);
+                break;
+            //REPEL, DRAIN
+            case 3:
+                DeleteTurns(4, pressTurnPane);
+                break;
+        }
+    }
+
+    private void DeleteTurns(int val, Transform pressTurnPane)
+    {
+        for (int i = 0; i < val; ++i)
+        {
+            Destroy(pressTurnPane.transform.GetChild(pressTurnPane.transform.childCount - 1).gameObject);
+        }
+    
+        if (pressTurnPane.transform.childCount == 1)
+        {
+            SwitchTeams();
+            CreatePartyTurns();
+            active = playerTeam.GetComponent<Team>().player;
+        }
+    }
+
+    private void ExtraTurn(Transform pressTurnPane)
+    {
+        for (int i = (pressTurnPane.transform.childCount - 1); i >= 0; --i)
+        {
+            if (pressTurnPane.transform.GetChild(i).GetComponent<Image>().sprite == pressTurnIcon.sprite)
+            {
+                pressTurnPane.transform.GetChild(i).GetComponent<Image>().sprite = glowingPressTurnIcon;
+                return;
+            }
+        }
+
+        DeleteTurns(1, pressTurnPane);
+    }
+
+    public void UpdateName()
+    {
+        actionCommand.text = "WHAT WILL " + active.GetComponent<ActorStats>().stats.name + " DO?";
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        actionCommand.text = "WHAT WILL " + active.GetComponent<ActorStats>().stats.name + " DO?";
         ReadCompendiums();
 
         foreach (Transform child in playerTeam.transform)
         {
+            child.GetComponent<ActorStats>().LoadCharacter();
             var childStats = child.GetComponent<ActorStats>().stats;
+
             foreach (int skillID in childStats.baseSkills)
             {
                 childStats.skills.Add(skillCompendium[skillID]);
             }
-            childStats.skills.Add(JsonUtility.FromJson<SupportSkill>((Resources.Load("Skills/support/tarunda") as TextAsset).text));
+            
+            if (child.GetSiblingIndex() >= 1 && child.GetSiblingIndex() < 2)
+                playerTeam.GetComponent<Team>().activeDemons.Add(child.gameObject);
+
+            if (child.name == "nahobino")
+                childStats.skills.Add(JsonUtility.FromJson<SupportSkill>((Resources.Load("Skills/support/tarunda") as TextAsset).text));
         }
 
         foreach (Transform child in opponentTeam.transform)
         {
+            child.GetComponent<ActorStats>().LoadCharacter();
             var childStats = child.GetComponent<ActorStats>().stats;
+
             foreach (int skillID in childStats.baseSkills)
             {
                 childStats.skills.Add(skillCompendium[skillID]);
             }
+
+            if (child.GetSiblingIndex() >= 1 && child.GetSiblingIndex() < 2)
+                opponentTeam.GetComponent<Team>().activeDemons.Add(child.gameObject);
+
+            if (child.name == "nahobino")
+                childStats.skills.Add(JsonUtility.FromJson<SupportSkill>((Resources.Load("Skills/support/lusterCandy") as TextAsset).text));
         }
+
+
+        UpdateName();
+        CreatePartyTurns();
     }
 
     // Update is called once per frame
