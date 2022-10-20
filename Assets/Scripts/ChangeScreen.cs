@@ -29,7 +29,7 @@ public class ChangeScreen : MonoBehaviour
                 || child == team.GetComponent<Team>().player.transform)
                 continue;
 
-            var faceImage = Instantiate(button, new Vector2(210f + 300f * ((offset % 4) + 1), 360f + 300f * ((offset / 4) + 1)), Quaternion.identity);
+            var faceImage = Instantiate(button, new Vector2(210f + 300f * ((offset % 4) + 1), 660f - 200f * (offset / 4)), Quaternion.identity);
             faceImage.GetComponent<Image>().sprite = child.GetComponent<ActorStats>().faceSprite;
             faceImage.transform.SetParent(transform.Find("FaceImages").transform);      
             faceImage.onClick.AddListener(delegate { gameManager.GetComponent<GameManager>().ChangeDemons(child.gameObject); });
