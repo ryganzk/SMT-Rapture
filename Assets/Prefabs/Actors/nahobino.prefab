@@ -2707,6 +2707,8 @@ GameObject:
   - component: {fileID: 6524006242667831932}
   - component: {fileID: 5383057195186905491}
   - component: {fileID: -4099491875371505359}
+  - component: {fileID: -7171976171189378299}
+  - component: {fileID: -8458819500456551700}
   m_Layer: 0
   m_Name: nahobino
   m_TagString: Untagged
@@ -2817,6 +2819,33 @@ MonoBehaviour:
   guard: 0
   references:
     version: 1
+--- !u!64 &-7171976171189378299
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1666201602403623251}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -4429620849851450535, guid: 1bdcaa4aa145a744db84073f8f1192c6, type: 3}
+--- !u!65 &-8458819500456551700
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1666201602403623251}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1.7223417, z: 1}
+  m_Center: {x: 0, y: 0.8718439, z: 0}
 --- !u!1 &1675550808629703316
 GameObject:
   m_ObjectHideFlags: 0

@@ -1246,6 +1246,7 @@ GameObject:
   - component: {fileID: 3253462753270188858}
   - component: {fileID: 1585779634140725322}
   - component: {fileID: 6080674086935187102}
+  - component: {fileID: 26764755353189777}
   m_Layer: 0
   m_Name: pixie
   m_TagString: Untagged
@@ -1351,6 +1352,20 @@ MonoBehaviour:
   guard: 0
   references:
     version: 1
+--- !u!64 &26764755353189777
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2768956818952688000}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -5974410962670351432, guid: 3bf7561d484c26b4d85c9918fd33a64a, type: 3}
 --- !u!1 &2798819859761668812
 GameObject:
   m_ObjectHideFlags: 0

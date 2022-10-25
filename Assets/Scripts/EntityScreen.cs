@@ -32,7 +32,8 @@ public class EntityScreen : MonoBehaviour
         CreateSelectButton(team.player);
         foreach (GameObject obj in team.activeDemons)
         {
-            CreateSelectButton(obj);
+            if (obj != null)
+                CreateSelectButton(obj);
         }
 
         CreateBackButton();
@@ -43,10 +44,10 @@ public class EntityScreen : MonoBehaviour
         var button = Instantiate(selectButton, obj.transform.position, Quaternion.identity);
         button.transform.SetParent(this.transform);
         button.GetComponent<EntityHUD>().lookAt = obj.transform;
-        button.onClick.AddListener(OnSelectButtonPress);
+        button.onClick.AddListener(delegate { OnSelectButtonPress(obj); });
     }
 
-    void OnSelectButtonPress()
+    void OnSelectButtonPress(GameObject obj)
     {
         GetComponent<Canvas>().enabled = false;
         mainBattleScreen.enabled = true;
@@ -57,6 +58,7 @@ public class EntityScreen : MonoBehaviour
             case 0:
             case 1:
                 gameManager.active.GetComponent<Animator>().SetTrigger("skillAtk");
+                gameManager.GetComponent<GameManager>().Damage((AttackSkill) selectedSkill, obj);
                 break;
             case 2:
             case 3:

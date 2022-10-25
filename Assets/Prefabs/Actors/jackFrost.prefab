@@ -4165,6 +4165,7 @@ GameObject:
   - component: {fileID: 5066941740942241514}
   - component: {fileID: 2896165271210962773}
   - component: {fileID: 3538189870062890799}
+  - component: {fileID: 6203037604674630476}
   m_Layer: 0
   m_Name: jackFrost
   m_TagString: Untagged
@@ -4266,10 +4267,24 @@ MonoBehaviour:
       ailment: 0
       heal: 0
       support: 0
-  faceSprite: {fileID: 0}
+  faceSprite: {fileID: -3371830529800172400, guid: de1b0137fff4cfb459c20a5ffc4921a4, type: 3}
   guard: 0
   references:
     version: 1
+--- !u!64 &6203037604674630476
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5555951030271112272}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -7434510616989199363, guid: c677c59eed145e941b017b7495b5a6a7, type: 3}
 --- !u!1 &5594124712353113960
 GameObject:
   m_ObjectHideFlags: 0

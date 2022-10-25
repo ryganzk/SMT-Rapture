@@ -3299,6 +3299,7 @@ GameObject:
   - component: {fileID: 1260703416541148623}
   - component: {fileID: 7502857577738591620}
   - component: {fileID: 1446645054149440843}
+  - component: {fileID: -2803247556587385822}
   m_Layer: 0
   m_Name: shiva
   m_TagString: Untagged
@@ -3405,6 +3406,20 @@ MonoBehaviour:
   guard: 0
   references:
     version: 1
+--- !u!64 &-2803247556587385822
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1888481312235204469}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 8365516042843280966, guid: 807c959551a81384b8b163f7151cbf4b, type: 3}
 --- !u!1 &1910953809152670419
 GameObject:
   m_ObjectHideFlags: 0

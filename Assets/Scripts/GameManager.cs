@@ -13,12 +13,14 @@ public class GameManager : MonoBehaviour
     private const int SUPPORT_ID = 258;
     private int turn = 1;
 
+    public Camera cam;
     public GameObject active;
     public Text actionCommand;
     public GameObject playerTeam, opponentTeam;
     public Animator cameraAnimator;
     public GameObject screen;
     public Image pressTurnIcon;
+    public Canvas main;
     public Sprite glowingPressTurnIcon;
 
     [SerializeReference]
@@ -423,6 +425,53 @@ public class GameManager : MonoBehaviour
         };
     }
 
+    public void Damage(AttackSkill skill, GameObject obj)
+    {
+        var attacker = active.GetComponent<ActorStats>().stats;
+        var defender = obj.GetComponent<ActorStats>().stats;
+
+        var demPower = 0;
+        if (skill.physical)
+            demPower = attacker.baseStats.strength;
+        else
+            demPower = attacker.baseStats.magic;
+
+        int damage = (int) Math.Floor(Math.Pow(demPower, 2) / (defender.baseStats.vitality * 1.5)
+            * (1 + (skill.power / 100f)) * ((UnityEngine.Random.Range(0f, 1f) / 3) + 1));
+
+        defender.battleStats.hp -= damage;
+
+        // If the attack defeats the defender
+        if (defender.battleStats.hp < 0)
+        {
+            var opposingTeam = opponentTeam.GetComponent<Team>();
+            defender.battleStats.hp = 0;
+            opposingTeam.activeDemons[opposingTeam.activeDemons.IndexOf(obj)] = null;
+            obj.SetActive(false);
+        }
+    }
+
+    public void FocusOnActive()
+    {
+        //var team = playerTeam.GetComponent<Team>();
+        //var opposing = 0;
+        //if (!team.homeTeam)
+        //    opposing = 1;
+
+        //cam.transform.position = new Vector3(
+        //    active.transform.position.x,
+        //    active.transform.position.y + (active.GetComponent<MeshCollider>().bounds.size.y * 50),
+        //    active.transform.position.z + (active.GetComponent<MeshCollider>().bounds.size.z * 50) + 3f - (6f * opposing));
+
+        //if (team.activeDemons.Contains(active))
+        //{
+        //    cam.transform.eulerAngles = new Vector3(
+        //        cam.transform.rotation.x,
+        //        (220f - (40f * team.activeDemons.IndexOf(active))) + (180f * opposing),
+        //        cam.transform.rotation.z);
+        //}
+    }
+
     public void BackToSideView()
     {
         cameraAnimator.Play("BackToSideView");
@@ -459,13 +508,18 @@ public class GameManager : MonoBehaviour
     public void NextUp(int val)
     {
         var team = playerTeam.GetComponent<Team>();
-        if (active == team.player)
+
+        while (true)
         {
-            active = team.activeDemons[0];
-        }
-        else
-        {
-            active = team.player;
+            if (active == team.player)
+                active = team.activeDemons[0];
+            else if (team.activeDemons.IndexOf(active) == team.activeDemons.Count - 1)
+                active = team.player;
+            else
+                active = team.activeDemons[team.activeDemons.IndexOf(active) + 1];
+
+            if (active != null)
+                break;
         }
 
         UpdatePress(val);
@@ -475,21 +529,36 @@ public class GameManager : MonoBehaviour
         {
             GuardEnd();
         }
+
+        FocusOnActive();
     }
 
-    public void ChangeDemons(GameObject demon)
+    public void ChangeDemons(GameObject oldDemon, GameObject newDemon)
     {
-        var temp = active;
-        demon.SetActive(true);
-        active.SetActive(false);
+        var tempPos = oldDemon.transform.position;
+        var tempRot = oldDemon.transform.rotation;
+        newDemon.SetActive(true);
 
-        var team = GetComponent<GameManager>().playerTeam.GetComponent<Team>().activeDemons;
-        team[team.IndexOf(active)] = demon;
+        var team = GetComponent<GameManager>().playerTeam.GetComponent<Team>();
 
-        demon.transform.position = active.transform.position;
-        demon.transform.rotation = active.transform.rotation;
-        active = demon;
+        // If oldDemon is in active party, perform swap
+        if (team.activeDemons.Contains(newDemon))
+        {
+            team.activeDemons[team.activeDemons.IndexOf(newDemon)] = oldDemon;
+            oldDemon.transform.position = newDemon.transform.position;
+            oldDemon.transform.rotation = newDemon.transform.rotation;
+        }
+        else
+            oldDemon.SetActive(false);
 
+        team.activeDemons[team.activeDemons.IndexOf(oldDemon)] = newDemon;
+        newDemon.transform.position = tempPos;
+        newDemon.transform.rotation = tempRot;
+
+        // Do not set new active if player is active
+        if (active != team.player)
+            active = newDemon;
+        
         NextUp(0);
     }
 
@@ -512,6 +581,7 @@ public class GameManager : MonoBehaviour
     public void CreatePartyTurns()
     {
         Transform pressTurnPane = screen.transform.Find("PressTurns");
+        int turnCount = 0;
 
         Color glow;
         if (playerTeam.GetComponent<Team>().homeTeam)
@@ -519,10 +589,17 @@ public class GameManager : MonoBehaviour
         else
             glow = Color.red;
 
-        for (int i = 0; i < playerTeam.GetComponent<Team>().activeDemons.Count + 1; ++i)
-        {
+        // Turn always generates for player
+        CreatePressTurn(0, pressTurnPane, glow);
 
-            CreatePressTurn(i, pressTurnPane, glow);
+        for (int i = 0; i < playerTeam.GetComponent<Team>().activeDemons.Count; ++i)
+        {
+            // Only generates turn if there's a demon at that position
+            if (playerTeam.GetComponent<Team>().activeDemons[i] != null)
+            {
+                CreatePressTurn(turnCount + 1, pressTurnPane, glow);
+                ++turnCount;
+            }
         }
     }
 
@@ -599,48 +676,41 @@ public class GameManager : MonoBehaviour
         Application.Quit();
     }
 
+    private void LoadTeam(GameObject team)
+    {
+        foreach (Transform child in team.transform)
+        {
+            child.GetComponent<ActorStats>().LoadCharacter();
+            var childStats = child.GetComponent<ActorStats>().stats;
+            childStats.battleStats.hp = childStats.baseStats.hp;
+            childStats.battleStats.mp = childStats.baseStats.mp;
+
+            foreach (int skillID in childStats.baseSkills)
+            {
+                childStats.skills.Add(skillCompendium[skillID]);
+            }
+
+            if (child.GetSiblingIndex() >= 1 && child.GetSiblingIndex() < 4)
+                team.GetComponent<Team>().activeDemons.Add(child.gameObject);
+        }
+
+        for (int i = team.GetComponent<Team>().activeDemons.Count; i < 3; ++i)
+        {
+            team.GetComponent<Team>().activeDemons.Add(null);
+        }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         ReadCompendiums();
 
-        foreach (Transform child in playerTeam.transform)
-        {
-            child.GetComponent<ActorStats>().LoadCharacter();
-            var childStats = child.GetComponent<ActorStats>().stats;
-
-            foreach (int skillID in childStats.baseSkills)
-            {
-                childStats.skills.Add(skillCompendium[skillID]);
-            }
-            
-            if (child.GetSiblingIndex() >= 1 && child.GetSiblingIndex() < 2)
-                playerTeam.GetComponent<Team>().activeDemons.Add(child.gameObject);
-
-            if (child.name == "nahobino")
-                childStats.skills.Add(JsonUtility.FromJson<SupportSkill>((Resources.Load("Skills/support/tarunda") as TextAsset).text));
-        }
-
-        foreach (Transform child in opponentTeam.transform)
-        {
-            child.GetComponent<ActorStats>().LoadCharacter();
-            var childStats = child.GetComponent<ActorStats>().stats;
-
-            foreach (int skillID in childStats.baseSkills)
-            {
-                childStats.skills.Add(skillCompendium[skillID]);
-            }
-
-            if (child.GetSiblingIndex() >= 1 && child.GetSiblingIndex() < 2)
-                opponentTeam.GetComponent<Team>().activeDemons.Add(child.gameObject);
-
-            if (child.name == "nahobino")
-                childStats.skills.Add(JsonUtility.FromJson<SupportSkill>((Resources.Load("Skills/support/lusterCandy") as TextAsset).text));
-        }
-
+        LoadTeam(playerTeam);
+        LoadTeam(opponentTeam);
 
         UpdateName();
         CreatePartyTurns();
+        FocusOnActive();
     }
 
     // Update is called once per frame

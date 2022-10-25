@@ -23,6 +23,13 @@ public class ActorStats : MonoBehaviour
     }
 
     [System.Serializable]
+    public class BattleStats
+    {
+        public int hp;
+        public int mp;
+    }
+
+    [System.Serializable]
     public class LevelSkills
     {
         public int physical;
@@ -84,6 +91,7 @@ public class ActorStats : MonoBehaviour
         public int[] alignment;
         public int level;
         public BaseStats baseStats;
+        public BattleStats battleStats;
         public int[] baseSkills;
         public int[] levelSkills;
         [SerializeReference]

@@ -5935,6 +5935,7 @@ GameObject:
   - component: {fileID: 4887714948692095918}
   - component: {fileID: 396215293749634122}
   - component: {fileID: -2254291769725360849}
+  - component: {fileID: 6741351293513727407}
   m_Layer: 0
   m_Name: angel
   m_TagString: Untagged
@@ -6040,6 +6041,20 @@ MonoBehaviour:
   guard: 0
   references:
     version: 1
+--- !u!64 &6741351293513727407
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5233031537357285652}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -8302281183987642993, guid: 609c0c513874edb4bb5d9049b2a6712d, type: 3}
 --- !u!1 &5236622565529428262
 GameObject:
   m_ObjectHideFlags: 0

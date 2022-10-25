@@ -3597,6 +3597,7 @@ GameObject:
   - component: {fileID: 6678568954704811491}
   - component: {fileID: -6069480878418002326}
   - component: {fileID: 5648783206968164210}
+  - component: {fileID: 3361526620728075926}
   m_Layer: 0
   m_Name: giremekhala
   m_TagString: Untagged
@@ -3702,6 +3703,20 @@ MonoBehaviour:
   guard: 0
   references:
     version: 1
+--- !u!64 &3361526620728075926
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6333428563396628313}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 8289108688099648751, guid: 0da94a518f458834293a2c236b7216b2, type: 3}
 --- !u!1 &6338574255922826816
 GameObject:
   m_ObjectHideFlags: 0
