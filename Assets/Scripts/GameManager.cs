@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     private const int RECOVERY_ID = 220;
     private const int SUPPORT_ID = 258;
     private int turn = 1;
+    [SerializeField] int index = 3;
 
     public Camera cam;
     public GameObject active;
@@ -508,19 +509,10 @@ public class GameManager : MonoBehaviour
     public void NextUp(int val)
     {
         var team = playerTeam.GetComponent<Team>();
-
-        while (true)
-        {
-            if (active == team.player)
-                active = team.activeDemons[0];
-            else if (team.activeDemons.IndexOf(active) == team.activeDemons.Count - 1)
-                active = team.player;
-            else
-                active = team.activeDemons[team.activeDemons.IndexOf(active) + 1];
-
-            if (active != null)
-                break;
-        }
+        
+        active = SetNextDemonActive(team);
+        while(active == null)
+            active = SetNextDemonActive(team);
 
         UpdatePress(val);
         UpdateName();
@@ -531,6 +523,22 @@ public class GameManager : MonoBehaviour
         }
 
         FocusOnActive();
+    }
+
+    public GameObject SetNextDemonActive(Team team)
+    {
+        index = (++index) % 4;
+        switch (index)
+        {
+            case 0:
+                return team.activeDemons[0];
+            case 1:
+                return team.activeDemons[1];
+            case 2:
+                return team.activeDemons[2];
+            default:
+                return team.player;
+        }
     }
 
     public void ChangeDemons(GameObject oldDemon, GameObject newDemon)
@@ -567,6 +575,7 @@ public class GameManager : MonoBehaviour
         var temp = playerTeam;
         playerTeam = opponentTeam;
         opponentTeam = temp;
+        index = 3;
 
         if (playerTeam.GetComponent<Team>().homeTeam)
         {
@@ -711,11 +720,5 @@ public class GameManager : MonoBehaviour
         UpdateName();
         CreatePartyTurns();
         FocusOnActive();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }
