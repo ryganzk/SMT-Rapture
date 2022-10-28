@@ -12,16 +12,17 @@ public class GameManager : MonoBehaviour
     private const int RECOVERY_ID = 220;
     private const int SUPPORT_ID = 258;
     private int turn = 1;
-    [SerializeField] int index = 3;
+    private int activeIndex = 3;
 
     public Camera cam;
     public GameObject active;
     public Text actionCommand;
     public GameObject playerTeam, opponentTeam;
     public Animator cameraAnimator;
-    public GameObject screen;
     public Image pressTurnIcon;
-    public Canvas main;
+    public Canvas screen;
+    public Canvas mainScreen;
+    public Canvas gameOverScreen;
     public Sprite glowingPressTurnIcon;
 
     [SerializeReference]
@@ -50,7 +51,7 @@ public class GameManager : MonoBehaviour
         public int power;
         public int type;
         public int accuracy;
-        public int[] hits;
+        public List<int> hits;
         public bool physical;
         public bool pierce;
     }
@@ -58,7 +59,7 @@ public class GameManager : MonoBehaviour
     [System.Serializable]
     public class AilmentSkill : NonPassiveSkill
     {
-        public int[] ailments;
+        public List<int> ailments;
         public int accuracy;
     }
 
@@ -74,14 +75,18 @@ public class GameManager : MonoBehaviour
     [System.Serializable]
     public class SupportSkill : NonPassiveSkill
     {
-        public int[] chargeID;
+        public List<int> chargeID;
         public bool selfOnly;
+        public List<int> support;
+        public int suppAmnt;
+        public bool buff;
+        public bool veil;
     }
 
     [System.Serializable]
     public class PassiveSkill : Skill
     {
-        public int[] passive;
+        public List<int> passive;
         public int strength;
     }
 
@@ -426,6 +431,107 @@ public class GameManager : MonoBehaviour
         };
     }
 
+    public List<GameObject> AliveDemons(List<GameObject> objs)
+    {
+        List<GameObject> aliveList = new List<GameObject>();
+
+        // Adds a demon to target if they exit in the list
+        foreach(GameObject obj in objs)
+        {
+            if (obj != null)
+                aliveList.Add(obj);
+        }
+
+        // Allows player targeting if not all demons are active OR self-inflicted boost/heal
+        if (aliveList.Count != 3 || objs[0].transform.parent.gameObject == playerTeam)
+            aliveList.Add(opponentTeam.GetComponent<Team>().player);
+        
+        return aliveList;
+    }
+
+    // ONLY FOR USE WHEN SWITCHING TURNS
+    public List<GameObject> AliveDemons(List<GameObject> objs, bool includePlayer)
+    {
+        List<GameObject> aliveList = new List<GameObject>();
+
+        // Adds a demon to target if they exit in the list
+        foreach (GameObject obj in objs)
+        {
+            if (obj != null)
+                aliveList.Add(obj);
+        }
+
+        // Allows player targeting if not all demons are active OR self-inflicted boost/heal
+        if (includePlayer)
+            aliveList.Add(playerTeam.GetComponent<Team>().player);
+
+        return aliveList;
+    }
+
+    public void PartyDamage(AttackSkill skill, List<GameObject> objs)
+    {
+        objs = AliveDemons(objs);
+
+        foreach (GameObject obj in objs)
+            Damage (skill, obj);
+    }
+
+    public void RandDamage(AttackSkill skill, List<GameObject> objs)
+    {
+        objs = AliveDemons(objs);
+
+        for (int i = 0; i < (int) Math.Floor((double) UnityEngine.Random.Range(skill.hits[0], skill.hits[1])); ++i) {
+            Damage(skill, objs[(int) Math.Floor((double) UnityEngine.Random.Range(0, objs.Count))]);
+        }
+    }
+
+    public void PartySupport(SupportSkill skill, List<GameObject> objs)
+    {
+        objs = AliveDemons(objs);
+
+        foreach (GameObject obj in objs)
+            Support(skill, obj);
+    }
+
+    public void Support(SupportSkill skill, GameObject obj)
+    {
+        int mod = 1;
+        if (!skill.buff)
+            mod *= -1;
+
+        foreach (int suppId in skill.support)
+        {
+            switch (suppId)
+            {
+                // ATTACK
+                case 0:
+                    obj.GetComponent<ActorStats>().attack
+                        = new List<int>{ SupportCalcAmnt(obj.GetComponent<ActorStats>().attack[0], mod * skill.suppAmnt), 3 };
+                    break;
+                case 1:
+                    obj.GetComponent<ActorStats>().defense
+                        = new List<int> { SupportCalcAmnt(obj.GetComponent<ActorStats>().defense[0], mod * skill.suppAmnt), 3 };
+                    break;
+                case 2:
+                    obj.GetComponent<ActorStats>().accEvas
+                        = new List<int> { SupportCalcAmnt(obj.GetComponent<ActorStats>().accEvas[0], mod * skill.suppAmnt), 3 };
+                    break;
+            }
+        }
+    }
+
+    public int SupportCalcAmnt(int stat, int amnt)
+    {
+        // Cannot boost over 2
+        if (stat + amnt > 2)
+            return 2;
+        // Cannot lower under -2
+        if (stat + amnt < -2)
+            return -2;
+        else
+            return stat + amnt;
+    }
+
     public void Damage(AttackSkill skill, GameObject obj)
     {
         var attacker = active.GetComponent<ActorStats>().stats;
@@ -437,8 +543,8 @@ public class GameManager : MonoBehaviour
         else
             demPower = attacker.baseStats.magic;
 
-        int damage = (int) Math.Floor(Math.Pow(demPower, 2) / (defender.baseStats.vitality * 1.5)
-            * (1 + (skill.power / 100f)) * ((UnityEngine.Random.Range(0f, 1f) / 3) + 1));
+        int damage = (int)Math.Floor(Math.Pow(demPower, 2) / (defender.baseStats.vitality * 1.5)
+        * (1 + (skill.power / 100f)) * ((UnityEngine.Random.Range(0f, 1f) / 3) + 1));
 
         defender.battleStats.hp -= damage;
 
@@ -447,7 +553,15 @@ public class GameManager : MonoBehaviour
         {
             var opposingTeam = opponentTeam.GetComponent<Team>();
             defender.battleStats.hp = 0;
-            opposingTeam.activeDemons[opposingTeam.activeDemons.IndexOf(obj)] = null;
+
+
+            if (obj == opposingTeam.player)
+            {
+                opposingTeam.player = null;
+                GameOver();
+            }
+            else
+                opposingTeam.activeDemons[opposingTeam.activeDemons.IndexOf(obj)] = null;
             obj.SetActive(false);
         }
     }
@@ -527,8 +641,8 @@ public class GameManager : MonoBehaviour
 
     public GameObject SetNextDemonActive(Team team)
     {
-        index = (++index) % 4;
-        switch (index)
+        activeIndex = (++activeIndex) % 4;
+        switch (activeIndex)
         {
             case 0:
                 return team.activeDemons[0];
@@ -575,7 +689,11 @@ public class GameManager : MonoBehaviour
         var temp = playerTeam;
         playerTeam = opponentTeam;
         opponentTeam = temp;
-        index = 3;
+        activeIndex = 3;
+        
+        List<GameObject> party = AliveDemons(playerTeam.GetComponent<Team>().activeDemons, true);
+        foreach (GameObject obj in party)
+            ReduceTurns(obj);
 
         if (playerTeam.GetComponent<Team>().homeTeam)
         {
@@ -585,6 +703,30 @@ public class GameManager : MonoBehaviour
         }
         else
             screen.transform.Find("Turn").GetComponent<Text>().text = "Enemy Turn";
+    }
+
+    public void ReduceTurns(GameObject obj)
+    {
+        ActorStats stats = obj.GetComponent<ActorStats>();
+        ReduceStatTurns(stats.attack);
+        ReduceStatTurns(stats.defense);
+        ReduceStatTurns(stats.accEvas);
+    }
+
+    public void ReduceStatTurns(List<int> stat)
+    {
+        switch (stat[1])
+        {
+            case 0:
+                break;
+            case 1:
+                stat[0] = 0;
+                stat[1] = 0;
+                break;
+            default:
+                --stat[1];
+                break;
+        }
     }
 
     public void CreatePartyTurns()
@@ -706,6 +848,26 @@ public class GameManager : MonoBehaviour
         for (int i = team.GetComponent<Team>().activeDemons.Count; i < 3; ++i)
         {
             team.GetComponent<Team>().activeDemons.Add(null);
+        }
+    }
+
+    void GameOver()
+    {
+        mainScreen.enabled = false;
+        screen.enabled = false;
+        gameOverScreen.enabled = true;
+
+        Text winText = gameOverScreen.transform.Find("WinText").GetComponent<Text>();
+
+        if(playerTeam.GetComponent<Team>().homeTeam == true)
+        {
+            winText.text = "Ally Team Wins!";
+            winText.color = Color.cyan;
+        }
+        else
+        {
+            winText.text = "Enemy Team Wins!";
+            winText.color = Color.red;
         }
     }
 

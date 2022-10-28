@@ -73,22 +73,22 @@ public class SkillScreen : MonoBehaviour
     {
         mainBattleScreen.enabled = true;
         GetComponent<Canvas>().enabled = false;
-        gameManager.cameraAnimator.Play("SideToBackView");
+        //gameManager.cameraAnimator.Play("SideToBackView");
     }
 
     void OnSkillButtonPress(Skill skill)
     {
         entityScreen.enabled = true;
-        entityScreen.GetComponent<EntityScreen>().selectedSkill = skill;
+        entityScreen.GetComponent<EntityScreen>().selectedSkill = (NonPassiveSkill) skill;
         GetComponent<Canvas>().enabled = false;
 
         var gameManagerScript = gameManager.GetComponent<GameManager>();
-        if ((gameManagerScript.DetermineSkillType(skill) < 2
-                && gameManagerScript.playerTeam.GetComponent<Team>().homeTeam)
-                || (gameManagerScript.DetermineSkillType(skill) >= 2
-                && !gameManagerScript.playerTeam.GetComponent<Team>().homeTeam))
-            gameManager.cameraAnimator.Play("SideToEnemyView");
-        else
-            gameManager.cameraAnimator.Play("SideToAllyView");
+        //if ((gameManagerScript.DetermineSkillType(skill) < 2
+        //        && gameManagerScript.playerTeam.GetComponent<Team>().homeTeam)
+        //        || (gameManagerScript.DetermineSkillType(skill) >= 2
+        //        && !gameManagerScript.playerTeam.GetComponent<Team>().homeTeam))
+        //    gameManager.cameraAnimator.Play("SideToEnemyView");
+        //else
+        //    gameManager.cameraAnimator.Play("SideToAllyView");
     }
 }
