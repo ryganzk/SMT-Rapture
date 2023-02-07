@@ -2,6 +2,7 @@ import {Battler} from "./battler.js"
 import {Compendium} from "./data/compendium.js"
 import {Party} from "./data/party.js"
 import {Player} from "./data/player.js"
+import fs from 'fs'
 
 const compendium = new Compendium()
 
@@ -26,4 +27,21 @@ party2.pushNewActor(compendium.getDemon(53), [49, 0, 0, 0, 60, 0, 0, 0], [])
 party2.addItem(compendium.getItem(0), 5)
 
 const battler = new Battler(party1, party2)
-battler.begin()
+
+var jsonObj = JSON.parse(JSON.stringify(party2));
+//console.log(jsonObj);
+ 
+// stringify JSON Object
+var jsonContent = JSON.stringify(jsonObj);
+//console.log(jsonContent);
+ 
+fs.writeFile("output.json", jsonContent, 'utf8', function (err) {
+    if (err) {
+        console.log("An error occured while writing JSON Object to File.");
+        return console.log(err);
+    }
+ 
+    console.log("JSON file has been saved.");
+});
+
+//battler.begin()

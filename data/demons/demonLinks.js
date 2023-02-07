@@ -238,7 +238,7 @@
     JSON.parse(await fsPromises.readFile("./data/demons/deity/baal.json")),
     JSON.parse(await fsPromises.readFile("./data/demons/herald/metatron.json")),
     JSON.parse(await fsPromises.readFile("./data/demons/tyrant/beelzebub.json")),
-    //JSON.parse(await fsPromises.readFile("./data/demons/fury/shiva.json")),
+    JSON.parse(await fsPromises.readFile("./data/demons/fury/shiva.json"))
  ]
 
  export const playerLinks = [
