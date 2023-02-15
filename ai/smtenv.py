@@ -1,18 +1,12 @@
 from gym import Env
 from gym.spaces import Discrete, Box
 from nextState import *
+from serializer import *
 import numpy as np
 import random
-import pyduktape
 import json
 
-## Have object that represents environment state
-## Return struct that represents the next state
-
-class SMTState():
-    def __init__(self):
-        with open('./state.json', 'r') as f:
-            self.state = json.load(f)
+NUM_STATES = 1
 
 ## Action selector
 ## Process the results
@@ -24,20 +18,14 @@ class SMTEnv(Env):
         self.action_space_moves = Discrete(8)
         self.action_space_targets = Discrete(3)
 
-        self.context = pyduktape.DuktapeContext()
-
         ## World state + agent state
 
         # Resistance array
-        self.observation_space = [
-            Box(low=np.array([0]), high=np.array([3])),
-            Box(low=np.array([0]), high=np.array([3])),
-            Box(low=np.array([0]), high=np.array([3])),
-        ]
-
-        # State array (player, dem1, dem2, dem3, oppPlayer, opp1, opp2, opp3)
-        # State knows EVERYTHING about the world
-        self.state = SMTState().state
+        self.observation_space = Box(low=np.array([0, 0, 0, 0]), high=np.array([3, 3, 3, 3]))
+        
+        self.runs = 0
+        
+        self.state = {}
 
         # Sets game as playable
         self.in_progress = True
@@ -47,10 +35,13 @@ class SMTEnv(Env):
         # Agent performs an action
         # Look at world state and figure out how action affects the world state
         
-        performAction(action)
+        self.state = nextState(self.filename, action)
+        
+        if self.state["complete"] == True:
+            self.in_progress = False
 
         # Calculate reward
-        if self.in_progress == False and self.state.turn == 0:
+        if self.in_progress == False and self.state["party1"]["player"]["battleStats"]["hp"] <= 0:
             reward = -1000
         elif self.in_progress == False:
             reward = 1000
@@ -72,15 +63,26 @@ class SMTEnv(Env):
     def render(self):
         pass
 
-    def reset(self):
+    def reset(self):        
         # Reset state
-        f = open('./state.json')
+        stateID = random.randrange(0, NUM_STATES)
+        rf = open("./states/state" + str(stateID) + ".json")
+        data = json.load(rf)
+        jsonData = to_json(data)
+        wf = open("./completedStates/state" + str(self.runs) + ".json", "w")
+        wf.write(jsonData)
+        f = open("./completedStates/state" + str(self.runs) + ".json")
         self.state = json.load(f)
+        self.filename = "./completedStates/state" + str(self.runs) + ".json"
 
         # Resets game to playable
         self.in_progress = True
 
+        self.runs += 1
         return self.state
+
+def chooseRandom():
+    return [random.randrange(0, 8), random.randrange(0, 3)]
 
 env = SMTEnv()
 
@@ -93,7 +95,7 @@ for episode in range(1, episodes+1):
     while not done:
         
         # Ask who's turn it is, if agent continue
-        if state['turn'] == 0:
+        if state["turn"][0] == 0:
             action = [env.action_space_moves.sample(), env.action_space_targets.sample()]
             n_state, reward, done, info = env.step(action)
             score += reward
@@ -102,15 +104,16 @@ for episode in range(1, episodes+1):
             action = chooseRandom()
             env.step(action)
     print('Episode:{} Score:{}'.format(episode, score))
+    
+### DEEP LEARNING MODEL    
 
-
-
+import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
 
 states = env.observation_space.shape
-actions = env.action_space.n
+actions = (3 * (env.action_space_moves.n - 1)) + env.action_space_targets.n
 
 def build_model(states, actions):
     model = Sequential()
@@ -136,7 +139,7 @@ def build_agent(model, actions):
     return dqn
 
 dqn = build_agent(model, actions)
-dqn.compile(Adam(lr=1e-3), metrics=['mae'])
+dqn.compile(Adam(learning_rate=1e-3), metrics=['mae'])
 dqn.fit(env, nb_steps=50000, visualize=False, verbose=1)
 
 scores = dqn.test(env, nb_episodes=100, visualize=False)
