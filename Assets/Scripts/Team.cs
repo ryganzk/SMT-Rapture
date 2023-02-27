@@ -8,6 +8,7 @@ public class Team : MonoBehaviour
     public List<GameObject> activeDemons;
     public GameObject[] demons;
     public bool homeTeam;
+    public bool ai;
     
     // Start is called before the first frame update
     void Start()

@@ -24,6 +24,8 @@ public class GameManager : MonoBehaviour
     public Canvas mainScreen;
     public Canvas gameOverScreen;
     public Sprite glowingPressTurnIcon;
+    public GameObject aiType;
+    public GameObject flavorText, switchText;
 
     [SerializeReference]
     public List<Skill> skillCompendium;
@@ -46,41 +48,50 @@ public class GameManager : MonoBehaviour
     }
 
     [System.Serializable]
-    public class AttackSkill : NonPassiveSkill
+    public class PseudoSupportSkill : NonPassiveSkill
     {
-        public int power;
-        public int type;
-        public int accuracy;
-        public List<int> hits;
-        public bool physical;
-        public bool pierce;
+        public List<int> support;
+        public int suppAmnt;
+        public bool buff;
     }
 
     [System.Serializable]
-    public class AilmentSkill : NonPassiveSkill
+    public class AilmentSkill : PseudoSupportSkill
     {
         public List<int> ailments;
         public int accuracy;
     }
 
     [System.Serializable]
+    public class AttackSkill : AilmentSkill
+    {
+        public int power;
+        public int type;
+        public List<int> hits;
+        public bool physical;
+        public bool pierce;
+        public int ohko;
+        public int critBonus;
+    }
+
+    [System.Serializable]
     public class RecoverySkill : NonPassiveSkill
     {
         public int recoverAmnt;
+        public int recoverPrct;
         public bool cure;
         public bool revive;
         public bool overheal;
     }
 
     [System.Serializable]
-    public class SupportSkill : NonPassiveSkill
+    public class SupportSkill : PseudoSupportSkill
     {
-        public List<int> chargeID;
         public bool selfOnly;
-        public List<int> support;
-        public int suppAmnt;
-        public bool buff;
+        public List<int> charge;
+        public List<int> block;
         public bool veil;
+        public bool taunt;
     }
 
     [System.Serializable]
@@ -457,7 +468,7 @@ public class GameManager : MonoBehaviour
         // Adds a demon to target if they exit in the list
         foreach (GameObject obj in objs)
         {
-            if (obj != null)
+            if (obj != null && obj.GetComponent<ActorStats>().stats.battleStats.hp > 0)
                 aliveList.Add(obj);
         }
 
@@ -468,21 +479,572 @@ public class GameManager : MonoBehaviour
         return aliveList;
     }
 
-    public void PartyDamage(AttackSkill skill, List<GameObject> objs)
+    public void ExecuteMove(GameObject obj, NonPassiveSkill skill, List<GameObject> team)
+    {
+        int result = 0;
+        flavorText.GetComponent<Text>().text = active.GetComponent<ActorStats>().stats.name + " Used " + skill.name + "!";
+        switch (DetermineSkillType(skill))
+        {
+            case 0:
+                active.GetComponent<Animator>().SetTrigger("skillAtk");
+                switch (skill.targets)
+                {
+                    case 1:
+                        result = PartyDamage((AttackSkill) skill, team);
+                        break;
+                    case 2:
+                        result = RandDamage((AttackSkill) skill, team);
+                        break;
+                    default:
+                        result = Damage((AttackSkill) skill, obj);
+                        break;
+                }
+                break;
+            case 1:
+                active.GetComponent<Animator>().SetTrigger("skillRcv");
+                switch (skill.targets)
+                {
+                    case 1:
+                        result = PartyAilment((AilmentSkill) skill, obj.transform.GetComponentInParent<Team>().activeDemons);
+                        break;
+                    default:
+                        result = Ailment((AilmentSkill) skill, obj);
+                        break;
+                }
+                break;
+            case 2:
+                active.GetComponent<Animator>().SetTrigger("skillRcv");
+                switch (skill.targets)
+                {
+                    case 1:
+                        PartyHeal((RecoverySkill) skill, obj.transform.GetComponentInParent<Team>().activeDemons);
+                        break;
+                    default:
+                        Heal((RecoverySkill) skill, obj);
+                        break;
+                }
+                break;
+            case 3:
+                active.GetComponent<Animator>().SetTrigger("skillRcv");
+                switch (skill.targets)
+                {
+                    case 1:
+                        PartySupport((SupportSkill) skill, obj.transform.GetComponentInParent<Team>().activeDemons);
+                        break;
+                    default:
+                        Support((SupportSkill) skill, obj);
+                        break;
+                }
+                break;
+
+        }
+
+        // Swap results of 1 and 0
+        if (result == 1)
+            result = 0;
+        else if (result == 0)
+            result = 1;
+        
+        StartCoroutine(Delay(result));
+    }
+
+    public int PartyDamage(AttackSkill skill, List<GameObject> objs)
+    {
+        int result = 0;
+        objs = AliveDemons(objs);
+
+        foreach (GameObject obj in objs)
+        {
+            int tempResult = Damage (skill, obj);
+            if (tempResult > result)
+                result = tempResult;
+        }
+        return result;
+    }
+
+    public int RandDamage(AttackSkill skill, List<GameObject> objs)
+    {
+        int result = 0;
+        objs = AliveDemons(objs);
+
+        for (int i = 0; i < (int) Math.Floor((double) UnityEngine.Random.Range(skill.hits[0], skill.hits[1])); ++i) {
+            int tempResult = Damage(skill, objs[(int) Math.Floor((double) UnityEngine.Random.Range(0, objs.Count))]);
+
+            if (tempResult > result)
+                result = tempResult;
+        }
+        return result;
+    }
+
+    public int Damage(AttackSkill skill, GameObject obj)
+    {
+        var attacker = active.GetComponent<ActorStats>();
+        var defender = obj.GetComponent<ActorStats>();
+
+        // TAUNT
+        foreach (GameObject dem in opponentTeam.GetComponent<Team>().activeDemons)
+        {
+            var demon = dem.GetComponent<ActorStats>();
+            if (demon.taunt[0] != 0)
+            {
+                var tauntChance = 30 * (((demon.stats.baseStats.luck / 2) + (demon.stats.baseStats.agility / 4)) 
+                    / ((attacker.stats.baseStats.luck / 2) + (attacker.stats.baseStats.agility / 4)));
+                
+                if ((UnityEngine.Random.Range(0f, 1f) * 100) < tauntChance)
+                {
+                    defender = demon;
+                    break;
+                }
+            }
+        }
+
+        float resMod = CalculateResistance(skill, attacker, defender);
+        float chargeVal = 1;
+        var affected = defender;
+        string result = "";
+
+        // PROTECTIVE BARRIER
+        if (resMod == 0 || defender.protective == skill.type + 3)
+        {
+            resMod = 0;
+            result = "NULL";
+        }
+
+        // Moves affected by guard/miss/critical
+        if (resMod > 0)
+        {
+            // GUARDING
+            if  (defender.guard && resMod >= 1)
+            {
+                resMod = 0.8f;
+                result = "GUARD";
+            }
+            
+            // MISS
+            if (!CalculateHit(skill, attacker, defender, 0))
+            {
+                result = "MISS";
+                resMod = 0;
+            }
+
+            // CRITICAL
+            else
+            {
+                if (CalculateCritRate(skill, attacker, defender))
+                {
+                    resMod *= (1.5f * (1 + (attacker.passives[21] * 0.3f)));
+                    result = "CRITICAL";
+                }
+                else
+                    resMod *= (1 - (attacker.passives[21] * 0.1f));
+            }
+        }
+
+        // REFLECT
+        if (resMod == -0.5f || (defender.protective == 1 && skill.type == 0) || (defender.protective == 2 && skill.type > 0 && skill.type < 7))
+        {
+            resMod = 1;
+            result = "REPEL";
+            affected = attacker;
+        }
+
+        else if (resMod == 2)
+        {
+            result = "WEAK";
+
+            // Calculated OHKO if weak
+            if (skill.ohko > 0 && CalculateInstaKill(skill, attacker, defender))
+            {
+                affected.stats.battleStats.hp = 0;
+            }
+        }
+
+        if (resMod == -1)
+            result = "DRAIN";
+            
+
+        if (attacker.charge == 3 || (skill.physical && attacker.charge == 1) || (!skill.physical && attacker.charge == 2))
+        {
+            chargeVal = 1.8f;
+        }
+
+        // Determine if physical or magical attack
+        var demPower = 0;
+        if (skill.physical)
+            demPower = attacker.stats.baseStats.strength;
+        else
+            demPower = attacker.stats.baseStats.magic;
+
+        var damage = Math.Pow(demPower, 2)
+                / (defender.stats.baseStats.vitality * 1.5f)
+                * (1 + (skill.power / 100f))
+                * resMod
+                * ((UnityEngine.Random.Range(0f, 1f) / 3) + 1)
+                * CalculateBattleBuff(attacker, 0)
+                * (2 - CalculateBattleBuff(defender, 1))
+                * (1 - (defender.damageDown * 0.3f))
+                * chargeVal
+                * PassiveIncreaser(attacker.passives[skill.type + 2])
+                + (1 * resMod);
+
+        affected.stats.battleStats.hp -= (int) damage;
+
+        // If drain overheals
+        if (affected.stats.battleStats.hp > affected.stats.baseStats.hp)
+            affected.stats.battleStats.hp = affected.stats.baseStats.hp;
+
+        int pressResult = 0;
+        if (result == "WEAK" || result == "CRITICAL")
+        {
+            if (attacker.passives[12] != 0)
+            {
+                int healAmnt = (
+                    RestoreAmnt(attacker.passives[12])
+                    > attacker.stats.baseStats.hp - attacker.stats.battleStats.hp
+                    ? attacker.stats.baseStats.hp - attacker.stats.battleStats.hp
+                    : RestoreAmnt(attacker.passives[12])
+                );
+                attacker.stats.battleStats.hp += healAmnt;
+            }
+            pressResult = 1;
+        }
+        else if (result == "NULL" || result == "MISS")
+            pressResult = 2;
+        else if (result == "REPEL" || result == "DRAIN")
+            pressResult = 3;
+
+        // If the attack defeats the defender
+        if (affected.stats.battleStats.hp <= 0)
+        {
+            var opposingTeam = opponentTeam.GetComponent<Team>();
+            affected.stats.battleStats.hp = 0;
+
+
+            if (obj == opposingTeam.player)
+            {
+                StartCoroutine(GameOver());
+            }
+
+            obj.SetActive(false);
+        }
+
+        // Apply support effects if attacked demon is still alive
+        if (pressResult < 2 && skill.support.Count > 0 && affected.stats.battleStats.hp > 0)
+        {
+            PseudoSupport((PseudoSupportSkill) skill, obj);
+        }
+
+        Debug.Log(result);
+        return pressResult;
+    }
+
+    private float CalculateResistance(AttackSkill skill, ActorStats attacker, ActorStats defender)
+    {
+        int skillRes = 0;
+
+        switch (skill.type)
+        {
+            case 0:
+                skillRes = defender.stats.resistances.physical;
+                break;
+            case 1:
+                skillRes = defender.stats.resistances.fire;
+                break;
+            case 2:
+                skillRes = defender.stats.resistances.ice;
+                break;
+            case 3:
+                skillRes = defender.stats.resistances.electric;
+                break;
+            case 4:
+                skillRes = defender.stats.resistances.force;
+                break;
+            case 5:
+                skillRes = defender.stats.resistances.light;
+                break;
+            case 6:
+                skillRes = defender.stats.resistances.dark;
+                break;
+            default:
+                return 1;
+        }
+
+        // Proceed if skill pierces or under effects of impaler animus
+        if (skill.pierce || attacker.charge == 3)
+        {
+            if (skillRes == 0)
+                return 2;
+            else
+                return 1;
+        }
+        
+        switch (skillRes)
+        {
+            case 0:
+                return 2;
+            case 1:
+                return 1;
+            case 2:
+                return 0.5f;
+            case 3:
+                return 0;
+            case 4:
+                return -0.5f;
+            case 5:
+                return -1;
+            default:
+                return 1;
+        }
+    }
+
+    private bool CalculateHit(AilmentSkill skill, ActorStats attacker, ActorStats defender, int ailmentType)
+    {
+        if (defender.ailment[0] == 5 || attacker.charge == 1)
+            return true;
+
+        float accuracy = skill.accuracy * (CalculateDemonHitAvoid(attacker) / CalculateDemonHitAvoid(defender)) * PassiveIncreaser(attacker.passives[15]);
+
+        // If pure ailment skill, take the defender's resistances to determine accuracy
+        if (skill.skillID >= ATTACK_ID)
+            accuracy *= (1.0f / AilmentLookup(defender, ailmentType)) * PassiveDecreaser(defender.passives[11]);
+
+        // If attacker is inflicted with mirage, lower accuracy
+        if (attacker.ailment[0] == 6)
+            accuracy /= 2;
+
+        if (UnityEngine.Random.Range(0, 100) < accuracy)
+            return true;
+        else
+            return false;
+    }
+
+    private float CalculateDemonHitAvoid(ActorStats demon)
+    {
+        return (demon.stats.baseStats.agility / 2.0f) + (demon.stats.baseStats.luck / 4.0f) * CalculateBattleBuff(demon, 2);
+    }
+
+    private int AilmentLookup(ActorStats demon, int type)
+    {
+        switch (type)
+        {
+            case 0:
+                return demon.stats.ailmentResistances.poison;
+            case 1:
+                return demon.stats.ailmentResistances.confusion;
+            case 2:
+                return demon.stats.ailmentResistances.charm;
+            case 3:
+                return demon.stats.ailmentResistances.seal;
+            case 4:
+                return demon.stats.ailmentResistances.sleep;
+            case 5:
+                return demon.stats.ailmentResistances.mirage;
+            default:
+                return 1;
+        }
+    }
+
+    private bool CalculateCritRate(AttackSkill skill, ActorStats attacker, ActorStats defender)
+    {
+        // Skills with 200 crit bonus are guaranteed crits
+        if (skill.critBonus == 200)
+            return true;
+
+        // CRITICAL AURA
+        if (skill.type == 0 && attacker.charge == 4)
+            return true;
+
+        float crit = skill.critBonus + (CalculateDemonCritAvoid(attacker) / CalculateDemonCritAvoid(defender)) * PassiveIncreaser(attacker.passives[16]) + 6.25f;
+
+        if (UnityEngine.Random.Range(0, 100) < crit)
+            return true;
+        else
+            return false;
+    }
+
+    private float CalculateDemonCritAvoid(ActorStats demon)
+    {
+        return (demon.stats.baseStats.luck / 2.0f) + (demon.stats.baseStats.agility / 4.0f);
+    }
+
+    private float CalculateBattleBuff(ActorStats demon, int type)
+    {
+        switch (type)
+        {
+            case 0:
+                return (1 + demon.attack[0] * 0.2f);
+            case 1:
+                return (1 + demon.defense[0] * 0.2f);
+            case 2:
+                return (1 + demon.accEvas[0] * 0.2f);
+            default:
+                return 1;
+        }
+    }
+
+    private bool CalculateInstaKill(AttackSkill skill, ActorStats attacker, ActorStats defender)
+    {
+        float killChance = skill.ohko * CalculateDemonInstaKillChance(attacker) / CalculateDemonInstaKillChance(defender) * PassiveDecreaser(defender.passives[11]);
+
+        if (UnityEngine.Random.Range(0, 100) < killChance)
+            return true;
+        else
+            return false;
+    }
+
+    private float CalculateDemonInstaKillChance(ActorStats demon)
+    {
+        return (demon.stats.baseStats.luck / 2.0f) + (demon.stats.baseStats.agility / 4.0f);
+    }
+
+    private float PassiveIncreaser(int amnt)
+    {
+        switch (amnt)
+        {
+            case 1:
+                return 1.2f;
+            case 2:
+                return 1.35f;
+            case 3:
+                return 1.55f;
+            default:
+                return 1;
+        }
+    }
+
+    private float PassiveDecreaser(int amnt)
+    {
+        switch (amnt)
+        {
+            case 1:
+                return 0.8f;
+            case 2:
+                return 0.65f;
+            case 3:
+                return 0.45f;
+            default:
+                return 1;
+        }
+    }
+
+    private int RestoreAmnt(int amnt)
+    {
+        switch (amnt)
+        {
+            case 1:
+                return 10;
+            case 2:
+                return 20;
+            case 3:
+                return 30;
+            default:
+                return 0;
+        }
+    }
+
+    public int PartyAilment(AilmentSkill skill, List<GameObject> objs)
+    {
+        int result = 0;
+        objs = AliveDemons(objs);
+
+        foreach (GameObject obj in objs)
+        {
+            int tempResult = Ailment (skill, obj);
+            if (tempResult > result)
+                result = tempResult;
+        }
+        return result;
+    }
+
+    public int Ailment(AilmentSkill skill, GameObject obj)
+    {
+        var attacker = active.GetComponent<ActorStats>();
+        var defender = obj.GetComponent<ActorStats>();
+        int result = 3;
+
+        foreach (int i in skill.ailments)
+        {
+            var resType = AilmentLookup(defender, i);
+
+            // Nulls ailment (remember to check other possible ailments)
+            if (resType == 3 && resType < result)
+            {
+                result = 2;
+            }
+            else if (resType == 0)
+            {
+                PseudoSupport(skill, obj);
+                CurseSiphoon(attacker);
+                defender.ailment = new List<int>{ i + 1, 0, attacker.passives[17]};
+                return 1;
+            }
+            else 
+            {
+                if (CalculateHit(skill, attacker, defender, resType))
+                {
+                    PseudoSupport(skill, obj);
+                    CurseSiphoon(attacker);
+                    defender.ailment = new List<int>{ i + 1, 0, attacker.passives[17]};
+                    return 0;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private void CurseSiphoon(ActorStats demon)
+    {
+        if (demon.passives[13] != 0)
+        {
+            int healAmnt = RestoreAmnt(demon.passives[13])
+                > demon.stats.baseStats.mp - demon.stats.battleStats.mp
+                ? demon.stats.baseStats.mp - demon.stats.battleStats.mp
+                : RestoreAmnt(demon.passives[13]);
+            demon.stats.battleStats.mp += healAmnt;
+        }
+    }
+
+    public void PartyHeal(RecoverySkill skill, List<GameObject> objs)
     {
         objs = AliveDemons(objs);
 
         foreach (GameObject obj in objs)
-            Damage (skill, obj);
+        {
+            Heal (skill, obj);
+        }
     }
 
-    public void RandDamage(AttackSkill skill, List<GameObject> objs)
+    public void Heal(RecoverySkill skill, GameObject obj)
     {
-        objs = AliveDemons(objs);
+        var healer = active.GetComponent<ActorStats>();
+        var recipient = obj.GetComponent<ActorStats>();
 
-        for (int i = 0; i < (int) Math.Floor((double) UnityEngine.Random.Range(skill.hits[0], skill.hits[1])); ++i) {
-            Damage(skill, objs[(int) Math.Floor((double) UnityEngine.Random.Range(0, objs.Count))]);
+        var recovery = 1.0;
+        int overheal = 0;
+
+        // BOWL OF HYGIEIA
+        if (healer.charge == 5)
+        {
+            recovery = 1.5f;
+            overheal = 1;
         }
+
+        if (skill.recoverAmnt != 0)
+            recovery *= skill.recoverAmnt * ((Math.Pow(healer.stats.baseStats.magic, 2) / 225.0f) + 1);
+        else
+            recovery *= (skill.recoverPrct / 100.0f) * recipient.stats.baseStats.hp;
+
+        // Overheal formula
+        if (recipient.stats.battleStats.hp + recovery > recipient.stats.battleStats.hp * OverhealExpr(overheal))
+            recovery = (recipient.stats.baseStats.hp * OverhealExpr(overheal)) - recipient.stats.battleStats.hp;
+
+        recipient.stats.battleStats.hp += (int) recovery;
+    }
+
+    private float OverhealExpr(int overheal)
+    {
+        return (1 + (overheal * 0.3f));
     }
 
     public void PartySupport(SupportSkill skill, List<GameObject> objs)
@@ -493,77 +1055,169 @@ public class GameManager : MonoBehaviour
             Support(skill, obj);
     }
 
+    public void PseudoSupport(PseudoSupportSkill skill, GameObject obj)
+    {
+        var caster = active.GetComponent<ActorStats>();
+        var recipient = obj.GetComponent<ActorStats>();
+
+        if (skill.support.Count > 0)
+            CalculatePseudoBuff(skill, caster, recipient);
+    }
+
     public void Support(SupportSkill skill, GameObject obj)
     {
-        int mod = 1;
-        if (!skill.buff)
-            mod *= -1;
+        var caster = active.GetComponent<ActorStats>();
+        var recipient = obj.GetComponent<ActorStats>();
 
+        if (skill.support.Count > 0)
+            CalculateBuff(skill, caster, recipient);
+        if (skill.charge.Count > 0)
+            CalculateCharge(skill, recipient);
+        if (skill.block.Count > 0)
+            CalculateProtection(skill, recipient);
+        if (skill.veil)
+            CalculateDamageDown(recipient);
+        if (skill.taunt)
+            CalculateTaunt(recipient);
+    }
+
+    private void CalculatePseudoBuff(PseudoSupportSkill skill, ActorStats caster, ActorStats recipient)
+    {
         foreach (int suppId in skill.support)
         {
             switch (suppId)
             {
                 // ATTACK
                 case 0:
-                    obj.GetComponent<ActorStats>().attack
-                        = new List<int>{ SupportCalcAmnt(obj.GetComponent<ActorStats>().attack[0], mod * skill.suppAmnt), 3 };
+                    PseudoBuffHelper(recipient.attack, skill, caster, recipient);
                     break;
                 case 1:
-                    obj.GetComponent<ActorStats>().defense
-                        = new List<int> { SupportCalcAmnt(obj.GetComponent<ActorStats>().defense[0], mod * skill.suppAmnt), 3 };
+                    PseudoBuffHelper(recipient.attack, skill, caster, recipient);
                     break;
                 case 2:
-                    obj.GetComponent<ActorStats>().accEvas
-                        = new List<int> { SupportCalcAmnt(obj.GetComponent<ActorStats>().accEvas[0], mod * skill.suppAmnt), 3 };
+                    PseudoBuffHelper(recipient.accEvas, skill, caster, recipient);
                     break;
+                case 3:
+                    recipient.attack = new List<int>{ 0, 0 };
+                    recipient.defense = new List<int>{ 0, 0 };
+                    recipient.accEvas = new List<int>{ 0, 0 };
+                    return;
             }
         }
     }
 
-    public int SupportCalcAmnt(int stat, int amnt)
+    private void CalculateBuff(SupportSkill skill, ActorStats caster, ActorStats recipient)
     {
-        // Cannot boost over 2
-        if (stat + amnt > 2)
-            return 2;
-        // Cannot lower under -2
-        if (stat + amnt < -2)
-            return -2;
-        else
-            return stat + amnt;
-    }
-
-    public void Damage(AttackSkill skill, GameObject obj)
-    {
-        var attacker = active.GetComponent<ActorStats>().stats;
-        var defender = obj.GetComponent<ActorStats>().stats;
-
-        var demPower = 0;
-        if (skill.physical)
-            demPower = attacker.baseStats.strength;
-        else
-            demPower = attacker.baseStats.magic;
-
-        int damage = (int)Math.Floor(Math.Pow(demPower, 2) / (defender.baseStats.vitality * 1.5)
-        * (1 + (skill.power / 100f)) * ((UnityEngine.Random.Range(0f, 1f) / 3) + 1));
-
-        defender.battleStats.hp -= damage;
-
-        // If the attack defeats the defender
-        if (defender.battleStats.hp < 0)
+        foreach (int suppId in skill.support)
         {
-            var opposingTeam = opponentTeam.GetComponent<Team>();
-            defender.battleStats.hp = 0;
-
-
-            if (obj == opposingTeam.player)
+            switch (suppId)
             {
-                opposingTeam.player = null;
-                GameOver();
+                // ATTACK
+                case 0:
+                    BuffHelper(recipient.attack, skill, caster, recipient);
+                    break;
+                case 1:
+                    BuffHelper(recipient.attack, skill, caster, recipient);
+                    break;
+                case 2:
+                    BuffHelper(recipient.accEvas, skill, caster, recipient);
+                    break;
+                case 3:
+                    recipient.attack = new List<int>{ 0, 0 };
+                    recipient.defense = new List<int>{ 0, 0 };
+                    recipient.accEvas = new List<int>{ 0, 0 };
+                    return;
             }
-            else
-                opposingTeam.activeDemons[opposingTeam.activeDemons.IndexOf(obj)] = null;
-            obj.SetActive(false);
         }
+    }
+
+    private void PseudoBuffHelper(List<int> effect, PseudoSupportSkill skill, ActorStats caster, ActorStats recipient)
+    {
+        if (skill.buff)
+        {
+            effect[0] += skill.suppAmnt;
+            if (effect[0] > 2)
+                effect[0] = 2;
+        }
+
+        else if (!skill.buff)
+        {
+            effect[0] -= skill.suppAmnt;
+            if (effect[0] < -2)
+                effect[0] = -2;
+        }
+
+        effect[1] = 3 + caster.passives[18];
+    }
+
+    private void BuffHelper(List<int> effect, SupportSkill skill, ActorStats caster, ActorStats recipient)
+    {
+        if (skill.buff)
+        {
+            effect[0] += skill.suppAmnt;
+            if (effect[0] > 2)
+                effect[0] = 2;
+        }
+
+        else if (!skill.buff)
+        {
+            effect[0] -= skill.suppAmnt;
+            if (effect[0] < -2)
+                effect[0] = -2;
+        }
+
+        effect[1] = 3 + caster.passives[18];
+    }
+
+    private void CalculateCharge(SupportSkill skill, ActorStats recipient)
+    {
+        recipient.charge = skill.charge[0] + 1;
+    }
+
+    private void RemoveCharge(AttackSkill skill, ActorStats recipient)
+    {
+        if ((skill.skillID < ATTACK_ID && (skill.physical && (recipient.charge == 1 || recipient.charge == 4)
+            || !skill.physical && (recipient.charge == 2 || recipient.charge == 3)))
+            || (skill.skillID >= AILMENT_ID && skill.skillID < RECOVERY_ID && recipient.charge == 5))
+            recipient.charge = 0;
+    }
+
+    private void CalculateProtection(SupportSkill skill, ActorStats recipient)
+    {
+        recipient.protective = skill.block[0] + 1;
+    }
+
+    private void ExpireProtection(Team team)
+    {
+        var player = team.player.GetComponent<ActorStats>();
+        player.protective = 0;
+        player.damageDown = 0;
+
+        foreach (GameObject obj in team.activeDemons)
+        {
+            var demon = obj.GetComponent<ActorStats>();
+            demon.protective = 0;
+            demon.damageDown = 0;
+        }
+    }
+
+    private void BreakProtection(AttackSkill skill, ActorStats demon)
+    {
+        if ((demon.protective == skill.type + 3) || (demon.protective == 1 && skill.type == 0) || (demon.protective == 2 && skill.type > 0 && skill.type < 7))
+            demon.protective = 0;
+
+        else if (demon.ailment[0] == 5)
+            demon.ailment = new List<int>{ 0, 0, 0 };
+    }
+
+    private void CalculateDamageDown(ActorStats demon)
+    {
+        demon.damageDown = 1;
+    }
+
+    private void CalculateTaunt(ActorStats demon)
+    {
+        demon.taunt = new List<int>{ 1, 3 };
     }
 
     public void FocusOnActive()
@@ -609,9 +1263,10 @@ public class GameManager : MonoBehaviour
 
     public void Guard()
     {
+        flavorText.GetComponent<Text>().text = active.GetComponent<ActorStats>().stats.name + " Is Guarding!";
         active.GetComponent<Animator>().SetTrigger("guardStart");
         active.GetComponent<ActorStats>().guard = true;
-        NextUp(1);
+        StartCoroutine(Delay(1));
     }
 
     public void GuardEnd()
@@ -625,7 +1280,7 @@ public class GameManager : MonoBehaviour
         var team = playerTeam.GetComponent<Team>();
         
         active = SetNextDemonActive(team);
-        while(active == null)
+        while(active == null || active.GetComponent<ActorStats>().stats.battleStats.hp <= 0)
             active = SetNextDemonActive(team);
 
         UpdatePress(val);
@@ -657,31 +1312,43 @@ public class GameManager : MonoBehaviour
 
     public void ChangeDemons(GameObject oldDemon, GameObject newDemon)
     {
-        var tempPos = oldDemon.transform.position;
-        var tempRot = oldDemon.transform.rotation;
-        newDemon.SetActive(true);
+        if (oldDemon != null)
+            flavorText.GetComponent<Text>().text = oldDemon.GetComponent<ActorStats>().stats.name + " Swapped With " + newDemon.GetComponent<ActorStats>().stats.name + "!";
+        else   
+            flavorText.GetComponent<Text>().text = newDemon.GetComponent<ActorStats>().stats.name + " Was Summoned!";
 
         var team = GetComponent<GameManager>().playerTeam.GetComponent<Team>();
+        var tempPos = oldDemon.transform.position;
+        var tempRot = oldDemon.transform.rotation;
+        var tempIndex = team.activeDemons.IndexOf(oldDemon);
+        newDemon.SetActive(true);
 
         // If oldDemon is in active party, perform swap
         if (team.activeDemons.Contains(newDemon))
         {
+            //Debug.Log("OLD DEMON: " + oldDemon.GetComponent<ActorStats>().stats.name.ToUpper() + " | OLD INDEX: " + team.activeDemons.IndexOf(oldDemon));
+            //Debug.Log("NEW DEMON: " + newDemon.GetComponent<ActorStats>().stats.name.ToUpper() + " | OLD INDEX: " + team.activeDemons.IndexOf(newDemon));
+            //Debug.Log("Before:" + team.activeDemons[team.activeDemons.IndexOf(newDemon)].GetComponent<ActorStats>().stats.name);
             team.activeDemons[team.activeDemons.IndexOf(newDemon)] = oldDemon;
+            //Debug.Log("After:" + team.activeDemons[team.activeDemons.IndexOf(oldDemon)].GetComponent<ActorStats>().stats.name);
             oldDemon.transform.position = newDemon.transform.position;
             oldDemon.transform.rotation = newDemon.transform.rotation;
         }
         else
             oldDemon.SetActive(false);
 
-        team.activeDemons[team.activeDemons.IndexOf(oldDemon)] = newDemon;
+        team.activeDemons[tempIndex] = newDemon;
         newDemon.transform.position = tempPos;
         newDemon.transform.rotation = tempRot;
+
+        //Debug.Log("OLD DEMON: " + oldDemon.GetComponent<ActorStats>().stats.name.ToUpper() + " | NEW INDEX: " + team.activeDemons.IndexOf(oldDemon));
+        //Debug.Log("NEW DEMON: " + newDemon.GetComponent<ActorStats>().stats.name.ToUpper() + " | NEW INDEX: " + team.activeDemons.IndexOf(newDemon));
 
         // Do not set new active if player is active
         if (active != team.player)
             active = newDemon;
         
-        NextUp(0);
+        StartCoroutine(Delay(0));
     }
 
     public void SwitchTeams()
@@ -703,6 +1370,14 @@ public class GameManager : MonoBehaviour
         }
         else
             screen.transform.Find("Turn").GetComponent<Text>().text = "Enemy Turn";
+
+        StartCoroutine(SwitchDelay(playerTeam.GetComponent<Team>().homeTeam));
+    }
+
+    public void AIMoves()
+    {
+        mainScreen.enabled = false;
+        ExecuteMove(opponentTeam.transform.Find("jackFrost").gameObject, (NonPassiveSkill) active.GetComponent<ActorStats>().stats.skills[0], opponentTeam.GetComponent<Team>().activeDemons);
     }
 
     public void ReduceTurns(GameObject obj)
@@ -746,7 +1421,7 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < playerTeam.GetComponent<Team>().activeDemons.Count; ++i)
         {
             // Only generates turn if there's a demon at that position
-            if (playerTeam.GetComponent<Team>().activeDemons[i] != null)
+            if (playerTeam.GetComponent<Team>().activeDemons[i] != null && playerTeam.GetComponent<Team>().activeDemons[i].GetComponent<ActorStats>().stats.battleStats.hp > 0)
             {
                 CreatePressTurn(turnCount + 1, pressTurnPane, glow);
                 ++turnCount;
@@ -790,17 +1465,38 @@ public class GameManager : MonoBehaviour
 
     private void DeleteTurns(int val, Transform pressTurnPane)
     {
+        int paneIndex = pressTurnPane.transform.childCount - 1;
+
+        float waitTime = 0.0f;
         for (int i = 0; i < val; ++i)
         {
-            Destroy(pressTurnPane.transform.GetChild(pressTurnPane.transform.childCount - 1).gameObject);
+            Destroy(pressTurnPane.transform.GetChild(paneIndex).gameObject);
+            --paneIndex;
+            if (paneIndex < 0)
+                break;
         }
     
-        if (pressTurnPane.transform.childCount == 1)
+        if (paneIndex < 0)
         {
+            waitTime = 3.0f;
+            flavorText.SetActive(false);
             SwitchTeams();
             CreatePartyTurns();
             active = playerTeam.GetComponent<Team>().player;
         }
+
+        StartCoroutine(AllowInput(waitTime));
+    }
+
+    IEnumerator AllowInput(float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+
+        // Enable menu if the player isn't an AI
+        if (!playerTeam.GetComponent<Team>().ai)
+            mainScreen.enabled = true;
+        else
+            AIMoves();
     }
 
     private void ExtraTurn(Transform pressTurnPane)
@@ -810,11 +1506,45 @@ public class GameManager : MonoBehaviour
             if (pressTurnPane.transform.GetChild(i).GetComponent<Image>().sprite == pressTurnIcon.sprite)
             {
                 pressTurnPane.transform.GetChild(i).GetComponent<Image>().sprite = glowingPressTurnIcon;
+                StartCoroutine(AllowInput(0));
                 return;
             }
         }
 
         DeleteTurns(1, pressTurnPane);
+    }
+
+    public void Pass()
+    {
+        flavorText.GetComponent<Text>().text = active.GetComponent<ActorStats>().stats.name + " Passed Their Turn!";
+        StartCoroutine(Delay(0));
+    }
+
+    IEnumerator Delay(int val)
+    {
+        mainScreen.enabled = false;
+        yield return new WaitForSeconds(3.0f);
+
+        NextUp(val);
+    }
+
+    IEnumerator SwitchDelay(bool playerTeam)
+    {
+        if (playerTeam)
+        {
+            switchText.GetComponent<Text>().text = "Player Turn";
+            switchText.GetComponent<Text>().color = Color.cyan;
+        }
+        else
+        {
+            switchText.GetComponent<Text>().text = "Enemy Turn";
+            switchText.GetComponent<Text>().color = Color.red;
+        }
+        switchText.SetActive(true);
+        yield return new WaitForSeconds(3.0f);
+
+        switchText.SetActive(false);
+        flavorText.SetActive(true);
     }
 
     public void UpdateName()
@@ -851,8 +1581,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void GameOver()
+    IEnumerator GameOver()
     {
+        yield return new WaitForSeconds(3.0f);
         mainScreen.enabled = false;
         screen.enabled = false;
         gameOverScreen.enabled = true;

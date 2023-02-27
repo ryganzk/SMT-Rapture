@@ -36,7 +36,8 @@ public class ChangeScreen : MonoBehaviour
         {
             var faceImage = Instantiate(button, new Vector2(360f + 300f * ((offset % 4) + 1), 660f), Quaternion.identity);
 
-            if (team.GetComponent<Team>().activeDemons[i] != null)
+            // Defeated demons will show as blank
+            if (team.GetComponent<Team>().activeDemons[i] != null && team.GetComponent<Team>().activeDemons[i].GetComponent<ActorStats>().stats.battleStats.hp > 0)
                 faceImage.GetComponent<Image>().sprite = team.GetComponent<Team>().activeDemons[i].GetComponent<ActorStats>().faceSprite;
             else
                 faceImage.GetComponent<Image>().sprite = inactiveImg;
@@ -89,6 +90,5 @@ public class ChangeScreen : MonoBehaviour
     private void DisableChangeScreen()
     {
         transform.GetComponent<Canvas>().enabled = false;
-        mainScreen.enabled = true;
     }
 }

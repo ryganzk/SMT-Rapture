@@ -36,7 +36,7 @@ public class EntityScreen : MonoBehaviour
             SupportSkill selectedSkillSupp = (SupportSkill) selectedSkill;
 
             // Player team selectors if skill buffs, charges, or has veil effect
-            if (selectedSkillSupp.buff || selectedSkillSupp.veil || selectedSkillSupp.chargeID.Count > 0)
+            if (selectedSkillSupp.buff || selectedSkillSupp.veil || selectedSkillSupp.charge.Count > 0)
                 team = gameManager.playerTeam.GetComponent<Team>();
             // Opposing team selectors if the above isn't true
             else
@@ -60,7 +60,7 @@ public class EntityScreen : MonoBehaviour
             {
                 foreach (GameObject obj in team.activeDemons)
                 {
-                    if (obj != null)
+                    if (obj != null && obj.GetComponent<ActorStats>().stats.battleStats.hp > 0)
                         CreateSelectButton(obj);
                 }
             }
@@ -79,47 +79,11 @@ public class EntityScreen : MonoBehaviour
     void OnSelectButtonPress(GameObject obj)
     {
         GetComponent<Canvas>().enabled = false;
-        mainBattleScreen.enabled = true;
         //gameManager.cameraAnimator.Play("BackView");
 
         List<GameObject> team = gameManager.opponentTeam.GetComponent<Team>().activeDemons;
 
-        switch (gameManager.DetermineSkillType(GetComponent<EntityScreen>().selectedSkill))
-        {
-
-            case 0:
-            case 1:
-                gameManager.active.GetComponent<Animator>().SetTrigger("skillAtk");
-                switch (selectedSkill.targets)
-                {
-                    case 1:
-                        gameManager.GetComponent<GameManager>().PartyDamage((AttackSkill) selectedSkill, team);
-                        break;
-                    case 2:
-                        gameManager.GetComponent<GameManager>().RandDamage((AttackSkill) selectedSkill, team);
-                        break;
-                    default:
-                        gameManager.GetComponent<GameManager>().Damage((AttackSkill) selectedSkill, obj);
-                        break;
-                }
-                break;
-            case 2:
-            case 3:
-                gameManager.active.GetComponent<Animator>().SetTrigger("skillRcv");
-                switch (selectedSkill.targets)
-                {
-                    case 1:
-                        gameManager.GetComponent<GameManager>().PartySupport((SupportSkill) selectedSkill, obj.transform.GetComponentInParent<Team>().activeDemons);
-                        break;
-                    default:
-                        gameManager.GetComponent<GameManager>().Support((SupportSkill) selectedSkill, obj);
-                        break;
-                }
-                break;
-
-        }
-
-        gameManager.GetComponent<GameManager>().NextUp(1);
+        gameManager.GetComponent<GameManager>().ExecuteMove(obj, selectedSkill, team);
     }
 
     void CreateBackButton()

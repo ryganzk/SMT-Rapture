@@ -2746,11 +2746,11 @@ Animator:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1666201602403623251}
   m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: 1bdcaa4aa145a744db84073f8f1192c6, type: 3}
+  m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: 23a89223329e768499ddbccc81b94ec1, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
@@ -2785,6 +2785,9 @@ MonoBehaviour:
       magic: 0
       agility: 0
       luck: 0
+    battleStats:
+      hp: 0
+      mp: 0
     baseSkills: 
     levelSkills: 
     skills: []
@@ -2817,6 +2820,15 @@ MonoBehaviour:
       support: 0
   faceSprite: {fileID: 1586712327433547278, guid: de1b0137fff4cfb459c20a5ffc4921a4, type: 3}
   guard: 0
+  ailment: 000000000000000000000000
+  charge: 0
+  protective: 0
+  damageDown: 0
+  taunt: 0000000000000000
+  attack: 0000000000000000
+  defense: 0000000000000000
+  accEvas: 0000000000000000
+  passives: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   references:
     version: 1
 --- !u!64 &-7171976171189378299
