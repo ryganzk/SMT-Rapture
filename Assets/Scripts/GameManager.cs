@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
+using static AI;
 
 public class GameManager : MonoBehaviour
 {
@@ -449,7 +450,7 @@ public class GameManager : MonoBehaviour
         // Adds a demon to target if they exit in the list
         foreach(GameObject obj in objs)
         {
-            if (obj != null)
+            if (obj != null && obj.GetComponent<ActorStats>().stats.battleStats.hp > 0)
                 aliveList.Add(obj);
         }
 
@@ -486,7 +487,11 @@ public class GameManager : MonoBehaviour
         switch (DetermineSkillType(skill))
         {
             case 0:
-                active.GetComponent<Animator>().SetTrigger("skillAtk");
+                if (((AttackSkill) skill).physical)
+                    active.GetComponent<Animator>().SetTrigger("skillAtk");
+                else
+                    active.GetComponent<Animator>().SetTrigger("skillRcv");
+
                 switch (skill.targets)
                 {
                     case 1:
@@ -567,7 +572,15 @@ public class GameManager : MonoBehaviour
         int result = 0;
         objs = AliveDemons(objs);
 
-        for (int i = 0; i < (int) Math.Floor((double) UnityEngine.Random.Range(skill.hits[0], skill.hits[1])); ++i) {
+        int maxHits;
+        if (skill.hits.Count == 1)
+            maxHits = skill.hits[0];
+        else
+            maxHits = skill.hits[1];
+
+        Debug.Log("HITS: " + (int) Math.Floor((double) UnityEngine.Random.Range(skill.hits[0], maxHits)));
+
+        for (int i = 0; i < (int) Math.Floor((double) UnityEngine.Random.Range(skill.hits[0], maxHits)); ++i) {
             int tempResult = Damage(skill, objs[(int) Math.Floor((double) UnityEngine.Random.Range(0, objs.Count))]);
 
             if (tempResult > result)
@@ -687,6 +700,11 @@ public class GameManager : MonoBehaviour
                 * PassiveIncreaser(attacker.passives[skill.type + 2])
                 + (1 * resMod);
 
+        if (result != "")
+            Debug.Log(affected.name + " TOOK " + damage + " DAMAGE! " + result + "!");
+        else
+            Debug.Log(affected.name + " TOOK " + damage + " DAMAGE!");
+
         affected.stats.battleStats.hp -= (int) damage;
 
         // If drain overheals
@@ -723,6 +741,8 @@ public class GameManager : MonoBehaviour
             if (obj == opposingTeam.player)
             {
                 StartCoroutine(GameOver());
+                obj.SetActive(false);
+                return 4;
             }
 
             obj.SetActive(false);
@@ -734,7 +754,6 @@ public class GameManager : MonoBehaviour
             PseudoSupport((PseudoSupportSkill) skill, obj);
         }
 
-        Debug.Log(result);
         return pressResult;
     }
 
@@ -1277,6 +1296,10 @@ public class GameManager : MonoBehaviour
 
     public void NextUp(int val)
     {
+        // On game over...
+        if (val == 4)
+            return;
+
         var team = playerTeam.GetComponent<Team>();
         
         active = SetNextDemonActive(team);
@@ -1312,7 +1335,7 @@ public class GameManager : MonoBehaviour
 
     public void ChangeDemons(GameObject oldDemon, GameObject newDemon)
     {
-        if (oldDemon != null)
+        if (oldDemon.GetComponent<ActorStats>().stats.battleStats.hp > 0)
             flavorText.GetComponent<Text>().text = oldDemon.GetComponent<ActorStats>().stats.name + " Swapped With " + newDemon.GetComponent<ActorStats>().stats.name + "!";
         else   
             flavorText.GetComponent<Text>().text = newDemon.GetComponent<ActorStats>().stats.name + " Was Summoned!";
@@ -1374,10 +1397,10 @@ public class GameManager : MonoBehaviour
         StartCoroutine(SwitchDelay(playerTeam.GetComponent<Team>().homeTeam));
     }
 
-    public void AIMoves()
+    public void AITurn()
     {
         mainScreen.enabled = false;
-        ExecuteMove(opponentTeam.transform.Find("jackFrost").gameObject, (NonPassiveSkill) active.GetComponent<ActorStats>().stats.skills[0], opponentTeam.GetComponent<Team>().activeDemons);
+        playerTeam.GetComponent<AI>().AIMove();
     }
 
     public void ReduceTurns(GameObject obj)
@@ -1496,7 +1519,7 @@ public class GameManager : MonoBehaviour
         if (!playerTeam.GetComponent<Team>().ai)
             mainScreen.enabled = true;
         else
-            AIMoves();
+            AITurn();
     }
 
     private void ExtraTurn(Transform pressTurnPane)
