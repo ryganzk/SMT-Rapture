@@ -26,7 +26,7 @@ ModelImporter:
     second: SK_dev259.ao|AN_dev259_11run
   - first:
       74: -4880715110686608997
-    second: SK_dev259.ao|AN_dev259_13skill_ex1
+    second: AngelSkillEx
   - first:
       74: 8282034090682340650
     second: SK_dev259.ao|AN_dev259_41encount
@@ -41,13 +41,13 @@ ModelImporter:
     second: AngelIdleB
   - first:
       74: -7627059945416903118
-    second: AngelDmg
+    second: AngelDamage
   - first:
       74: 558844552709874723
     second: AngelDying
   - first:
       74: 4112556174406528939
-    second: AngelAtk
+    second: AngelAttack
   - first:
       74: -390761224027879941
     second: AngelSkill
@@ -156,7 +156,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: AngelDmg
+      name: AngelDamage
       takeName: SK_dev259.ao|AN_dev259_03dmg
       internalID: 0
       firstFrame: 0
@@ -196,7 +196,7 @@ ModelImporter:
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 0
+      loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0
@@ -214,7 +214,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: AngelAtk
+      name: AngelAttack
       takeName: SK_dev259.ao|AN_dev259_05attack
       internalID: 0
       firstFrame: 0
@@ -301,7 +301,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: SK_dev259.ao|AN_dev259_13skill_ex1
+      name: AngelSkillEx
       takeName: SK_dev259.ao|AN_dev259_13skill_ex1
       internalID: 0
       firstFrame: 0

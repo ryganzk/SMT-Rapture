@@ -1637,11 +1637,39 @@ public class GameManager : MonoBehaviour
         StartCoroutine(Delay(0));
     }
 
+    void UpdateIdles()
+    {
+
+        DemonIdleUpdate(playerTeam.GetComponent<Team>().player);
+        foreach(GameObject demon in playerTeam.GetComponent<Team>().activeDemons)
+        {
+            DemonIdleUpdate(demon);
+        }
+
+        DemonIdleUpdate(opponentTeam.GetComponent<Team>().player);
+        foreach(GameObject demon in opponentTeam.GetComponent<Team>().activeDemons)
+        {
+            DemonIdleUpdate(demon);
+        }
+    }
+
+    void DemonIdleUpdate(GameObject demon)
+    {
+        if (demon.GetComponent<ActorStats>().stats.battleStats.hp <= demon.GetComponent<ActorStats>().stats.baseStats.hp / 4)
+        {
+            demon.GetComponent<Animator>().SetBool("dying", true);
+        }
+        else
+            demon.GetComponent<Animator>().SetBool("dying", false);
+    }
+
     IEnumerator Delay(int val)
     {
         mainScreen.enabled = false;
         var demon = active.GetComponent<ActorStats>();
         yield return new WaitForSeconds(3.0f);
+
+        UpdateIdles();
 
         if (active.GetComponent<ActorStats>().ailment[0] == 1)
         {
@@ -1656,6 +1684,7 @@ public class GameManager : MonoBehaviour
             }
 
             yield return new WaitForSeconds(3.0f);
+            DemonIdleUpdate(active);
         }
 
         StartCoroutine(SwitchDemon(val));

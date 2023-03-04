@@ -26,7 +26,7 @@ ModelImporter:
     second: SK_dev077.ao|AN_dev077_08skill_c
   - first:
       74: -7063197597590401989
-    second: SK_dev077.ao|AN_dev077_10skill_e
+    second: MaraSkillE
   - first:
       74: 1629695192136714942
     second: SK_dev077.ao|AN_dev077_11run
@@ -38,19 +38,25 @@ ModelImporter:
     second: MaraIdleA
   - first:
       74: 8627624325657531030
-    second: MaraDmg
+    second: MaraDamage
   - first:
       74: -2843976451970944389
     second: MaraDying
   - first:
       74: -9171875667685442067
-    second: MaraAtk
+    second: MaraAttack
   - first:
       74: -590393093834471720
     second: MaraSkillA
   - first:
       74: -4999922075873061419
     second: MaraRun
+  - first:
+      74: -5074886442894438381
+    second: MaraSkillB
+  - first:
+      74: 5128622456606322602
+    second: MaraSkillC
   externalObjects:
   - first:
       type: UnityEngine:Texture2D
@@ -114,7 +120,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: MaraDmg
+      name: MaraDamage
       takeName: SK_dev077.ao|AN_dev077_03dmg
       internalID: 0
       firstFrame: 0
@@ -154,7 +160,7 @@ ModelImporter:
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 0
+      loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0
@@ -172,7 +178,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: MaraAtk
+      name: MaraAttack
       takeName: SK_dev077.ao|AN_dev077_05attack
       internalID: 0
       firstFrame: 0
@@ -230,7 +236,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: SK_dev077.ao|AN_dev077_07skill_b
+      name: MaraSkillB
       takeName: SK_dev077.ao|AN_dev077_07skill_b
       internalID: 0
       firstFrame: 0
@@ -259,7 +265,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: SK_dev077.ao|AN_dev077_08skill_c
+      name: MaraSkillC
       takeName: SK_dev077.ao|AN_dev077_08skill_c
       internalID: 0
       firstFrame: 0
@@ -288,7 +294,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: SK_dev077.ao|AN_dev077_10skill_e
+      name: MaraSkillE
       takeName: SK_dev077.ao|AN_dev077_10skill_e
       internalID: 0
       firstFrame: 0
