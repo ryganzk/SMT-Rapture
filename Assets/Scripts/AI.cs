@@ -5,11 +5,6 @@ using static GameManager;
 
 public class AI : MonoBehaviour
 {
-    private const int ATTACK_ID = 182;
-    private const int AILMENT_ID = 200;
-    private const int RECOVERY_ID = 220;
-    private const int SUPPORT_ID = 258;
-
     // Move Factors
     public float attackFactor;
     public float ailmentFactor;
@@ -36,14 +31,37 @@ public class AI : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     public void AIMove()
     {
-        List<Skill> skills = DetermineMoveType(attackFactor, ailmentFactor, healFactor, supportFactor);
-        NonPassiveSkill randMove = (NonPassiveSkill) skills[(int) Mathf.Floor(UnityEngine.Random.Range(0f, skills.Count))];
-        GameObject target = DetermineTarget();
+        GameObject target = null;
+        NonPassiveSkill randMove = null;
+        List<Skill> skills = null;
+        List<float> factorArray = new List<float> { attackFactor, ailmentFactor, healFactor, supportFactor };
+
+        while (target == null)
+        {
+            skills = DetermineMoveType(factorArray[0], factorArray[1], factorArray[2], factorArray[3]);
+
+            while (skills != null)
+            {
+                randMove = (NonPassiveSkill) skills[(int) Mathf.Floor(UnityEngine.Random.Range(0f, skills.Count))];
+                Debug.Log("MOVE: " + randMove);
+                
+                List<GameObject> demons = gameManager.AliveDemons(gameManager.opponentTeam.GetComponent<Team>().activeDemons);
+                target = DetermineTarget(randMove, demons);
+                Debug.Log("TARGET: " + target);
+
+                if (target != null)
+                    break;
+
+                skills.Remove(randMove);
+                if (skills.Count == 0)
+                    factorArray[gameManager.DetermineSkillType((Skill) randMove)] = 0;
+            }
+        }
         
         gameManager.ExecuteMove(target, randMove, gameManager.opponentTeam.GetComponent<Team>().activeDemons);
     }
@@ -122,10 +140,25 @@ public class AI : MonoBehaviour
         return skills;
     }
 
-    public GameObject DetermineTarget()
+    GameObject DetermineTarget(NonPassiveSkill randMove, List<GameObject> demons)
     {
-        List<GameObject> demons = gameManager.AliveDemons(gameManager.opponentTeam.GetComponent<Team>().activeDemons);
+        if (demons.Count == 0)
+            return null;
+
         GameObject randTarget = demons[(int) Mathf.Floor(UnityEngine.Random.Range(0f, demons.Count))];
+
+        // Almighty skills cannot be blocked
+        if (((AttackSkill) randMove).type == 7)
+            return randTarget;
+
+        // Don't use move if target nulls move or better
+        int resAmnt = gameManager.playerTeam.GetComponent<Team>().FindOpposingData(randTarget).resistances[((AttackSkill) randMove).type];
+        if (resAmnt > 2 && resAmnt != 7)
+        {
+            demons.Remove(randTarget);
+            randTarget = DetermineTarget(randMove, demons);
+        }
+
         return randTarget;
     }
 }

@@ -1475,6 +1475,8 @@ GameObject:
   - component: {fileID: 3394792765443927498}
   - component: {fileID: -6559183431837922195}
   - component: {fileID: 4497964135921303720}
+  - component: {fileID: 7389218198171925624}
+  - component: {fileID: 3266678418605100254}
   m_Layer: 0
   m_Name: alice
   m_TagString: Untagged
@@ -1592,6 +1594,35 @@ MonoBehaviour:
   passives: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   references:
     version: 1
+--- !u!54 &7389218198171925624
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2618678961968363376}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 122
+  m_CollisionDetection: 0
+--- !u!65 &3266678418605100254
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2618678961968363376}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.30027074, y: 1.1869965, z: 0.2821744}
+  m_Center: {x: 0.000000029802322, y: 0.59416664, z: 0.03317687}
 --- !u!1 &2776895193149722541
 GameObject:
   m_ObjectHideFlags: 0

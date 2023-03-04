@@ -23,7 +23,19 @@ public class SkillScreen : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        CreateAttackButton(gameManager.active.GetComponent<ActorStats>().stats.skills[0]);
+        AttackSkill normalAttack = new AttackSkill();
+        normalAttack.name = "Attack";
+        normalAttack.desc = "A normal physical attack";
+        normalAttack.cost = 0;
+        normalAttack.targets = 0;
+        normalAttack.power = 80;
+        normalAttack.type = 0;
+        normalAttack.accuracy = 98;
+        normalAttack.physical = true;
+        normalAttack.pierce = false;
+        normalAttack.support = new List<int>();
+
+        CreateAttackButton(normalAttack);
         int skillCount = gameManager.active.GetComponent<ActorStats>().stats.skills.Count;
         
         for (int i = 0; i < skillCount; ++i)
@@ -38,6 +50,9 @@ public class SkillScreen : MonoBehaviour
             newSkill.GetComponentInChildren<Text>().text = skill.name + " - " + skill.cost + "MP";
             newSkill.onClick.AddListener(delegate { OnSkillButtonPress(skill); });
             newSkill.onClick.AddListener(entityScreen.GetComponent<EntityScreen>().UpdateSelectButtons);
+
+            if (gameManager.active.GetComponent<ActorStats>().stats.battleStats.mp < skill.cost)
+                newSkill.interactable = false;
         }
 
         CreateBackButton(skillCount + 1);

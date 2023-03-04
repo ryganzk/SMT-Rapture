@@ -3009,7 +3009,8 @@ GameObject:
   - component: {fileID: 6622426500126545973}
   - component: {fileID: 1312677713220493118}
   - component: {fileID: -2986669483701601880}
-  - component: {fileID: -6594006186362172973}
+  - component: {fileID: 8451486684522627777}
+  - component: {fileID: 447950004675984349}
   m_Layer: 0
   m_Name: mara
   m_TagString: Untagged
@@ -3081,6 +3082,9 @@ MonoBehaviour:
       magic: 0
       agility: 0
       luck: 0
+    battleStats:
+      hp: 0
+      mp: 0
     baseSkills: 
     levelSkills: 
     skills: []
@@ -3113,10 +3117,35 @@ MonoBehaviour:
       support: 0
   faceSprite: {fileID: 7839085925812605580, guid: de1b0137fff4cfb459c20a5ffc4921a4, type: 3}
   guard: 0
+  ailment: 000000000000000000000000
+  charge: 0
+  protective: 0
+  damageDown: 0
+  taunt: 0000000000000000
+  attack: 0000000000000000
+  defense: 0000000000000000
+  accEvas: 0000000000000000
+  passives: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   references:
     version: 1
---- !u!64 &-6594006186362172973
-MeshCollider:
+--- !u!54 &8451486684522627777
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5813097618068030095}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 122
+  m_CollisionDetection: 0
+--- !u!65 &447950004675984349
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -3125,10 +3154,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -3055252133217461801, guid: 09b6d3d75ff3b844981a16064d0a16dd, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 4.6589174, y: 4.0581994, z: 4.604306}
+  m_Center: {x: -0.13652658, y: 2.0205958, z: -0.13652658}
 --- !u!1 &5816877929195664324
 GameObject:
   m_ObjectHideFlags: 0

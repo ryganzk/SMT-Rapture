@@ -3299,7 +3299,8 @@ GameObject:
   - component: {fileID: 1260703416541148623}
   - component: {fileID: 7502857577738591620}
   - component: {fileID: 1446645054149440843}
-  - component: {fileID: -2803247556587385822}
+  - component: {fileID: 8982288345317267540}
+  - component: {fileID: 1548577220723607411}
   m_Layer: 0
   m_Name: shiva
   m_TagString: Untagged
@@ -3372,6 +3373,9 @@ MonoBehaviour:
       magic: 0
       agility: 0
       luck: 0
+    battleStats:
+      hp: 0
+      mp: 0
     baseSkills: 00000000
     levelSkills: 
     skills: []
@@ -3404,10 +3408,35 @@ MonoBehaviour:
       support: 0
   faceSprite: {fileID: -5683411687790492387, guid: de1b0137fff4cfb459c20a5ffc4921a4, type: 3}
   guard: 0
+  ailment: 000000000000000000000000
+  charge: 0
+  protective: 0
+  damageDown: 0
+  taunt: 0000000000000000
+  attack: 0000000000000000
+  defense: 0000000000000000
+  accEvas: 0000000000000000
+  passives: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   references:
     version: 1
---- !u!64 &-2803247556587385822
-MeshCollider:
+--- !u!54 &8982288345317267540
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1888481312235204469}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 122
+  m_CollisionDetection: 0
+--- !u!65 &1548577220723607411
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -3416,10 +3445,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 8365516042843280966, guid: 807c959551a81384b8b163f7151cbf4b, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.7480666, y: 2.8235178, z: 0.6760856}
+  m_Center: {x: 0.077979416, y: 1.4036288, z: 0.0059984326}
 --- !u!1 &1910953809152670419
 GameObject:
   m_ObjectHideFlags: 0

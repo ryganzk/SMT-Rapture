@@ -8,10 +8,10 @@ using static AI;
 
 public class GameManager : MonoBehaviour
 {
-    private const int ATTACK_ID = 182;
-    private const int AILMENT_ID = 200;
-    private const int RECOVERY_ID = 220;
-    private const int SUPPORT_ID = 258;
+    public const int ATTACK_ID = 182;
+    public const int AILMENT_ID = 200;
+    public const int RECOVERY_ID = 220;
+    public const int SUPPORT_ID = 258;
     private int turn = 1;
     private int activeIndex = 3;
 
@@ -483,7 +483,10 @@ public class GameManager : MonoBehaviour
     public void ExecuteMove(GameObject obj, NonPassiveSkill skill, List<GameObject> team)
     {
         int result = 0;
-        flavorText.GetComponent<Text>().text = active.GetComponent<ActorStats>().stats.name + " Used " + skill.name + "!";
+        if (skill.name == "Attack")
+            flavorText.GetComponent<Text>().text = active.GetComponent<ActorStats>().stats.name + " Attacked!";
+        else
+            flavorText.GetComponent<Text>().text = active.GetComponent<ActorStats>().stats.name + " Used " + skill.name + "!";
         switch (DetermineSkillType(skill))
         {
             case 0:
@@ -503,7 +506,9 @@ public class GameManager : MonoBehaviour
                     default:
                         result = Damage((AttackSkill) skill, obj);
                         break;
-                }
+                }   
+
+                RemoveCharge((AttackSkill) skill, active.GetComponent<ActorStats>());
                 break;
             case 1:
                 active.GetComponent<Animator>().SetTrigger("skillRcv");
@@ -528,6 +533,8 @@ public class GameManager : MonoBehaviour
                         Heal((RecoverySkill) skill, obj);
                         break;
                 }
+
+                RemoveCharge((RecoverySkill) skill, active.GetComponent<ActorStats>());
                 break;
             case 3:
                 active.GetComponent<Animator>().SetTrigger("skillRcv");
@@ -550,6 +557,7 @@ public class GameManager : MonoBehaviour
         else if (result == 0)
             result = 1;
         
+        active.GetComponent<ActorStats>().stats.battleStats.mp -= skill.cost;
         StartCoroutine(Delay(result));
     }
 
@@ -578,7 +586,7 @@ public class GameManager : MonoBehaviour
         else
             maxHits = skill.hits[1];
 
-        Debug.Log("HITS: " + (int) Math.Floor((double) UnityEngine.Random.Range(skill.hits[0], maxHits)));
+        //Debug.Log("HITS: " + (int) Math.Floor((double) UnityEngine.Random.Range(skill.hits[0], maxHits)));
 
         for (int i = 0; i < (int) Math.Floor((double) UnityEngine.Random.Range(skill.hits[0], maxHits)); ++i) {
             int tempResult = Damage(skill, objs[(int) Math.Floor((double) UnityEngine.Random.Range(0, objs.Count))]);
@@ -625,19 +633,19 @@ public class GameManager : MonoBehaviour
 
         // Moves affected by guard/miss/critical
         if (resMod > 0)
-        {
-            // GUARDING
-            if  (defender.guard && resMod >= 1)
-            {
-                resMod = 0.8f;
-                result = "GUARD";
-            }
-            
+        { 
             // MISS
             if (!CalculateHit(skill, attacker, defender, 0))
             {
                 result = "MISS";
                 resMod = 0;
+            }
+
+            // GUARDING
+            else if  (defender.guard && resMod >= 1)
+            {
+                resMod = 0.8f;
+                result = "GUARD";
             }
 
             // CRITICAL
@@ -731,14 +739,32 @@ public class GameManager : MonoBehaviour
         else if (result == "REPEL" || result == "DRAIN")
             pressResult = 3;
 
+        // Update known data 
+        if (result != "MISS" && result != "GUARD" && skill.type != 7)
+            playerTeam.GetComponent<Team>().UpdateOpposingData(playerTeam.GetComponent<Team>().FindOpposingData(obj), (NonPassiveSkill) skill, defender);
+
         // If the attack defeats the defender
         if (affected.stats.battleStats.hp <= 0)
         {
-            var opposingTeam = opponentTeam.GetComponent<Team>();
             affected.stats.battleStats.hp = 0;
 
+            // If the attacker kills itself (REPEL)
+            if (active.GetComponent<ActorStats>() == affected)
+            {
+                // If the attacker IS the opposing player
+                if(active == playerTeam.GetComponent<Team>().player)
+                {
+                    StartCoroutine(GameOver());
+                    active.SetActive(false);
+                    return 4;
+                }
 
-            if (obj == opposingTeam.player)
+                active.SetActive(false);
+                return pressResult;
+            }
+
+            // If the attacker kills the opposing player
+            if (obj == opponentTeam.GetComponent<Team>().player)
             {
                 StartCoroutine(GameOver());
                 obj.SetActive(false);
@@ -757,36 +783,32 @@ public class GameManager : MonoBehaviour
         return pressResult;
     }
 
-    private float CalculateResistance(AttackSkill skill, ActorStats attacker, ActorStats defender)
+    public int GetResistance(AttackSkill skill, ActorStats defender)
     {
-        int skillRes = 0;
-
         switch (skill.type)
         {
             case 0:
-                skillRes = defender.stats.resistances.physical;
-                break;
+                return defender.stats.resistances.physical;
             case 1:
-                skillRes = defender.stats.resistances.fire;
-                break;
+                return defender.stats.resistances.fire;
             case 2:
-                skillRes = defender.stats.resistances.ice;
-                break;
+                return defender.stats.resistances.ice;
             case 3:
-                skillRes = defender.stats.resistances.electric;
-                break;
+                return defender.stats.resistances.electric;
             case 4:
-                skillRes = defender.stats.resistances.force;
-                break;
+                return defender.stats.resistances.force;
             case 5:
-                skillRes = defender.stats.resistances.light;
-                break;
+                return defender.stats.resistances.light;
             case 6:
-                skillRes = defender.stats.resistances.dark;
-                break;
+                return defender.stats.resistances.dark;
             default:
                 return 1;
         }
+    }
+
+    private float CalculateResistance(AttackSkill skill, ActorStats attacker, ActorStats defender)
+    {
+        int skillRes = GetResistance(skill, defender);
 
         // Proceed if skill pierces or under effects of impaler animus
         if (skill.pierce || attacker.charge == 3)
@@ -1190,14 +1212,19 @@ public class GameManager : MonoBehaviour
 
     private void CalculateCharge(SupportSkill skill, ActorStats recipient)
     {
+
         recipient.charge = skill.charge[0] + 1;
     }
 
     private void RemoveCharge(AttackSkill skill, ActorStats recipient)
     {
-        if ((skill.skillID < ATTACK_ID && (skill.physical && (recipient.charge == 1 || recipient.charge == 4)
-            || !skill.physical && (recipient.charge == 2 || recipient.charge == 3)))
-            || (skill.skillID >= AILMENT_ID && skill.skillID < RECOVERY_ID && recipient.charge == 5))
+        if ((skill.physical && recipient.charge == 1) || (!skill.physical && recipient.charge == 2) || recipient.charge == 3 || recipient.charge == 4)
+            recipient.charge = 0;
+    }
+
+    private void RemoveCharge(RecoverySkill skill, ActorStats recipient)
+    {
+        if (skill.skillID >= AILMENT_ID && skill.skillID < RECOVERY_ID && recipient.charge == 5)
             recipient.charge = 0;
     }
 
@@ -1572,7 +1599,7 @@ public class GameManager : MonoBehaviour
 
     public void UpdateName()
     {
-        actionCommand.text = "WHAT WILL " + active.GetComponent<ActorStats>().stats.name + " DO?";
+        actionCommand.text = "What Will " + active.GetComponent<ActorStats>().stats.name + " Do?";
     }
 
     public void QuitGame()
@@ -1598,6 +1625,14 @@ public class GameManager : MonoBehaviour
                 team.GetComponent<Team>().activeDemons.Add(child.gameObject);
         }
 
+        Team otherTeam;
+        if (team == playerTeam)
+            otherTeam = opponentTeam.GetComponent<Team>();
+        else
+            otherTeam = playerTeam.GetComponent<Team>();
+
+        team.GetComponent<Team>().FillOpposingData(otherTeam);
+
         for (int i = team.GetComponent<Team>().activeDemons.Count; i < 3; ++i)
         {
             team.GetComponent<Team>().activeDemons.Add(null);
@@ -1613,9 +1648,15 @@ public class GameManager : MonoBehaviour
 
         Text winText = gameOverScreen.transform.Find("WinText").GetComponent<Text>();
 
-        if(playerTeam.GetComponent<Team>().homeTeam == true)
+        Team homeTeam;
+        if (playerTeam.GetComponent<Team>().homeTeam)
+            homeTeam = playerTeam.GetComponent<Team>();
+        else
+            homeTeam = opponentTeam.GetComponent<Team>();
+
+        if(homeTeam.player.GetComponent<ActorStats>().stats.battleStats.hp > 0)
         {
-            winText.text = "Ally Team Wins!";
+            winText.text = "Player Team Wins!";
             winText.color = Color.cyan;
         }
         else
