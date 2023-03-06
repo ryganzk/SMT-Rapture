@@ -28,6 +28,8 @@ public class GameManager : MonoBehaviour
     public Sprite glowingPressTurnIcon;
     public GameObject aiType;
     public GameObject flavorText, switchText;
+    public GameObject demonDex;
+    public GameObject battlePositions;
 
     [SerializeReference]
     public List<Skill> skillCompendium;
@@ -1724,6 +1726,7 @@ public class GameManager : MonoBehaviour
     {
         foreach (Transform child in team.transform)
         {
+            Debug.Log(child.name);
             child.GetComponent<ActorStats>().LoadCharacter();
             var childStats = child.GetComponent<ActorStats>().stats;
             childStats.battleStats.hp = childStats.baseStats.hp;
@@ -1779,13 +1782,51 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void SetTeam()
+    {
+        DemonDex demonIndicies = demonDex.GetComponent<DemonDex>();
+        Team allyTeam = playerTeam.GetComponent<Team>();
+        Team enemyTeam = opponentTeam.GetComponent<Team>();
+
+       CreateDemon(demonIndicies.MatchIndexWithDemon(PlayerPrefs.GetInt("allyPlayer")), battlePositions.transform.GetChild(0), allyTeam, true);
+       for (int i = 0; i < 3; ++i)
+       {
+            CreateDemon(demonIndicies.MatchIndexWithDemon(PlayerPrefs.GetInt("allyTeammate" + i)), battlePositions.transform.GetChild(i + 1), allyTeam, false);
+       }
+
+       CreateDemon(demonIndicies.MatchIndexWithDemon(PlayerPrefs.GetInt("enemyPlayer")), battlePositions.transform.GetChild(4), enemyTeam, true);
+       for (int i = 0; i < 3; ++i)
+       {
+            CreateDemon(demonIndicies.MatchIndexWithDemon(PlayerPrefs.GetInt("enemyTeammate" + i)), battlePositions.transform.GetChild(i + 5), enemyTeam, false);
+       }
+    }
+
+    GameObject CreateDemon(GameObject demon, Transform battlePos, Team team, bool player)
+    {
+        GameObject readyDemon = Instantiate(demon, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
+        readyDemon.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionX |RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
+        readyDemon.transform.SetParent(team.transform);
+        readyDemon.transform.position = battlePos.position;
+        readyDemon.transform.rotation = battlePos.rotation;
+
+        if (player)
+            team.player = readyDemon;
+        else
+            team.demons.Add(readyDemon);
+
+        return demon;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         ReadCompendiums();
 
+        SetTeam();
         LoadTeam(playerTeam);
         LoadTeam(opponentTeam);
+
+        active = playerTeam.GetComponent<Team>().player;
 
         UpdateName();
         CreatePartyTurns();
