@@ -41,10 +41,22 @@ ModelImporter:
     second: GiremekhalaDying
   - first:
       74: -6101319208517434460
-    second: GiremekhalaAtk
+    second: GiremekhalaAttack
+  - first:
+      74: 8245730999816341222
+    second: GiremekhalaDying
+  - first:
+      74: -4898073033303972370
+    second: GiremekhalaDamage
   - first:
       74: 8245730999816341222
     second: GiremekhalaSkillA
+  - first:
+      74: 8938278446027352596
+    second: GiremekhalaSkillC
+  - first:
+      74: 3968011087530417383
+    second: GiremekhalaSkillE
   externalObjects:
   - first:
       type: UnityEngine:Texture2D
@@ -137,7 +149,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: GiremekhalaDmg
+      name: GiremekhalaDamage
       takeName: SK_dev232.ao|AN_dev232_03dmg
       internalID: 0
       firstFrame: 0
@@ -177,7 +189,7 @@ ModelImporter:
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 0
+      loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0
@@ -195,7 +207,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: GiremekhalaAtk
+      name: GiremekhalaAttack
       takeName: SK_dev232.ao|AN_dev232_05attack
       internalID: 0
       firstFrame: 0
@@ -253,7 +265,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: SK_dev232.ao|AN_dev232_08skill_c
+      name: GiremekhalaSkillC
       takeName: SK_dev232.ao|AN_dev232_08skill_c
       internalID: 0
       firstFrame: 0
@@ -282,7 +294,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: SK_dev232.ao|AN_dev232_10skill_e
+      name: GiremekhalaSkillE
       takeName: SK_dev232.ao|AN_dev232_10skill_e
       internalID: 0
       firstFrame: 0

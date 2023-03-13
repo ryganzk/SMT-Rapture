@@ -4165,7 +4165,8 @@ GameObject:
   - component: {fileID: 5066941740942241514}
   - component: {fileID: 2896165271210962773}
   - component: {fileID: 3538189870062890799}
-  - component: {fileID: 6203037604674630476}
+  - component: {fileID: 8963724250748544705}
+  - component: {fileID: 6456743165993806758}
   m_Layer: 0
   m_Name: jackFrost
   m_TagString: Untagged
@@ -4237,6 +4238,9 @@ MonoBehaviour:
       magic: 0
       agility: 0
       luck: 0
+    battleStats:
+      hp: 0
+      mp: 0
     baseSkills: 
     levelSkills: 
     skills: []
@@ -4269,10 +4273,35 @@ MonoBehaviour:
       support: 0
   faceSprite: {fileID: -3371830529800172400, guid: de1b0137fff4cfb459c20a5ffc4921a4, type: 3}
   guard: 0
+  ailment: 000000000000000000000000
+  charge: 0
+  protective: 0
+  damageDown: 0
+  taunt: 0000000000000000
+  attack: 0000000000000000
+  defense: 0000000000000000
+  accEvas: 0000000000000000
+  passives: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   references:
     version: 1
---- !u!64 &6203037604674630476
-MeshCollider:
+--- !u!54 &8963724250748544705
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5555951030271112272}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 14
+  m_CollisionDetection: 0
+--- !u!65 &6456743165993806758
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -4281,10 +4310,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -7434510616989199363, guid: c677c59eed145e941b017b7495b5a6a7, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.5404941, y: 0.9874109, z: 0.5153158}
+  m_Center: {x: -0.01573652, y: 0.4972735, z: -0.003147304}
 --- !u!1 &5594124712353113960
 GameObject:
   m_ObjectHideFlags: 0

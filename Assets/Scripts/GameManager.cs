@@ -8,10 +8,11 @@ using static AI;
 
 public class GameManager : MonoBehaviour
 {
-    private const int ATTACK_ID = 182;
-    private const int AILMENT_ID = 200;
-    private const int RECOVERY_ID = 220;
-    private const int SUPPORT_ID = 258;
+    public const int ATTACK_ID = 182;
+    public const int AILMENT_ID = 200;
+    public const int RECOVERY_ID = 220;
+    public const int SUPPORT_ID = 258;
+    public const int SIDE_EFFECT_RATE = 40;
     private int turn = 1;
     private int activeIndex = 3;
 
@@ -27,6 +28,8 @@ public class GameManager : MonoBehaviour
     public Sprite glowingPressTurnIcon;
     public GameObject aiType;
     public GameObject flavorText, switchText;
+    public GameObject demonDex;
+    public GameObject battlePositions;
 
     [SerializeReference]
     public List<Skill> skillCompendium;
@@ -483,7 +486,10 @@ public class GameManager : MonoBehaviour
     public void ExecuteMove(GameObject obj, NonPassiveSkill skill, List<GameObject> team)
     {
         int result = 0;
-        flavorText.GetComponent<Text>().text = active.GetComponent<ActorStats>().stats.name + " Used " + skill.name + "!";
+        if (skill.name == "Attack")
+            flavorText.GetComponent<Text>().text = active.GetComponent<ActorStats>().stats.name + " Attacked!";
+        else
+            flavorText.GetComponent<Text>().text = active.GetComponent<ActorStats>().stats.name + " Used " + skill.name + "!";
         switch (DetermineSkillType(skill))
         {
             case 0:
@@ -503,7 +509,9 @@ public class GameManager : MonoBehaviour
                     default:
                         result = Damage((AttackSkill) skill, obj);
                         break;
-                }
+                }   
+
+                RemoveCharge((AttackSkill) skill, active.GetComponent<ActorStats>());
                 break;
             case 1:
                 active.GetComponent<Animator>().SetTrigger("skillRcv");
@@ -528,6 +536,8 @@ public class GameManager : MonoBehaviour
                         Heal((RecoverySkill) skill, obj);
                         break;
                 }
+
+                RemoveCharge((RecoverySkill) skill, active.GetComponent<ActorStats>());
                 break;
             case 3:
                 active.GetComponent<Animator>().SetTrigger("skillRcv");
@@ -550,6 +560,7 @@ public class GameManager : MonoBehaviour
         else if (result == 0)
             result = 1;
         
+        active.GetComponent<ActorStats>().stats.battleStats.mp -= skill.cost;
         StartCoroutine(Delay(result));
     }
 
@@ -578,7 +589,7 @@ public class GameManager : MonoBehaviour
         else
             maxHits = skill.hits[1];
 
-        Debug.Log("HITS: " + (int) Math.Floor((double) UnityEngine.Random.Range(skill.hits[0], maxHits)));
+        //Debug.Log("HITS: " + (int) Math.Floor((double) UnityEngine.Random.Range(skill.hits[0], maxHits)));
 
         for (int i = 0; i < (int) Math.Floor((double) UnityEngine.Random.Range(skill.hits[0], maxHits)); ++i) {
             int tempResult = Damage(skill, objs[(int) Math.Floor((double) UnityEngine.Random.Range(0, objs.Count))]);
@@ -625,19 +636,19 @@ public class GameManager : MonoBehaviour
 
         // Moves affected by guard/miss/critical
         if (resMod > 0)
-        {
-            // GUARDING
-            if  (defender.guard && resMod >= 1)
-            {
-                resMod = 0.8f;
-                result = "GUARD";
-            }
-            
+        { 
             // MISS
             if (!CalculateHit(skill, attacker, defender, 0))
             {
                 result = "MISS";
                 resMod = 0;
+            }
+
+            // GUARDING
+            else if  (defender.guard && resMod >= 1)
+            {
+                resMod = 0.8f;
+                result = "GUARD";
             }
 
             // CRITICAL
@@ -731,14 +742,32 @@ public class GameManager : MonoBehaviour
         else if (result == "REPEL" || result == "DRAIN")
             pressResult = 3;
 
+        // Update known data 
+        if (result != "MISS" && result != "GUARD" && skill.type != 7)
+            playerTeam.GetComponent<Team>().UpdateOpposingData(playerTeam.GetComponent<Team>().FindOpposingData(obj), (NonPassiveSkill) skill, defender);
+
         // If the attack defeats the defender
         if (affected.stats.battleStats.hp <= 0)
         {
-            var opposingTeam = opponentTeam.GetComponent<Team>();
             affected.stats.battleStats.hp = 0;
 
+            // If the attacker kills itself (REPEL)
+            if (active.GetComponent<ActorStats>() == affected)
+            {
+                // If the attacker IS the opposing player
+                if(active == playerTeam.GetComponent<Team>().player)
+                {
+                    StartCoroutine(GameOver());
+                    active.SetActive(false);
+                    return 4;
+                }
 
-            if (obj == opposingTeam.player)
+                active.SetActive(false);
+                return pressResult;
+            }
+
+            // If the attacker kills the opposing player
+            if (obj == opponentTeam.GetComponent<Team>().player)
             {
                 StartCoroutine(GameOver());
                 obj.SetActive(false);
@@ -757,36 +786,32 @@ public class GameManager : MonoBehaviour
         return pressResult;
     }
 
-    private float CalculateResistance(AttackSkill skill, ActorStats attacker, ActorStats defender)
+    public int GetResistance(AttackSkill skill, ActorStats defender)
     {
-        int skillRes = 0;
-
         switch (skill.type)
         {
             case 0:
-                skillRes = defender.stats.resistances.physical;
-                break;
+                return defender.stats.resistances.physical;
             case 1:
-                skillRes = defender.stats.resistances.fire;
-                break;
+                return defender.stats.resistances.fire;
             case 2:
-                skillRes = defender.stats.resistances.ice;
-                break;
+                return defender.stats.resistances.ice;
             case 3:
-                skillRes = defender.stats.resistances.electric;
-                break;
+                return defender.stats.resistances.electric;
             case 4:
-                skillRes = defender.stats.resistances.force;
-                break;
+                return defender.stats.resistances.force;
             case 5:
-                skillRes = defender.stats.resistances.light;
-                break;
+                return defender.stats.resistances.light;
             case 6:
-                skillRes = defender.stats.resistances.dark;
-                break;
+                return defender.stats.resistances.dark;
             default:
                 return 1;
         }
+    }
+
+    private float CalculateResistance(AttackSkill skill, ActorStats attacker, ActorStats defender)
+    {
+        int skillRes = GetResistance(skill, defender);
 
         // Proceed if skill pierces or under effects of impaler animus
         if (skill.pierce || attacker.charge == 3)
@@ -986,30 +1011,41 @@ public class GameManager : MonoBehaviour
             var resType = AilmentLookup(defender, i);
 
             // Nulls ailment (remember to check other possible ailments)
-            if (resType == 3 && resType < result)
+            if (resType == 3)
             {
+                Debug.Log(defender.name + " nulls the ailment...");
                 result = 2;
             }
             else if (resType == 0)
             {
-                PseudoSupport(skill, obj);
-                CurseSiphoon(attacker);
-                defender.ailment = new List<int>{ i + 1, 0, attacker.passives[17]};
+                InflictAilment(skill, obj, attacker, defender, i);
                 return 1;
             }
             else 
             {
                 if (CalculateHit(skill, attacker, defender, resType))
                 {
-                    PseudoSupport(skill, obj);
-                    CurseSiphoon(attacker);
-                    defender.ailment = new List<int>{ i + 1, 0, attacker.passives[17]};
+                    InflictAilment(skill, obj, attacker, defender, i);
                     return 0;
                 }
+                else
+                    Debug.Log(defender.name + " avoided the ailment...");
             }
         }
 
+        // If no null, treat as normal
+        if (result == 3)
+            return 0;
+
         return result;
+    }
+
+    void InflictAilment(AilmentSkill skill, GameObject obj, ActorStats attacker, ActorStats defender, int ailmentIndex)
+    {
+        Debug.Log(defender.name + " was inflicted...");
+        PseudoSupport(skill, obj);
+        CurseSiphoon(attacker);
+        defender.ailment = new List<int>{ ailmentIndex + 1, 0, attacker.passives[17] };
     }
 
     private void CurseSiphoon(ActorStats demon)
@@ -1021,6 +1057,21 @@ public class GameManager : MonoBehaviour
                 ? demon.stats.baseStats.mp - demon.stats.battleStats.mp
                 : RestoreAmnt(demon.passives[13]);
             demon.stats.battleStats.mp += healAmnt;
+        }
+    }
+
+    float PoisonRate(int amnt) {
+        switch(amnt) {
+            case 0:
+                return 16f;
+            case 1:
+                return 12f;
+            case 2:
+                return 8f;
+            case 3:
+                return 4f;
+            default:
+                return 16f;
         }
     }
 
@@ -1190,14 +1241,19 @@ public class GameManager : MonoBehaviour
 
     private void CalculateCharge(SupportSkill skill, ActorStats recipient)
     {
+
         recipient.charge = skill.charge[0] + 1;
     }
 
     private void RemoveCharge(AttackSkill skill, ActorStats recipient)
     {
-        if ((skill.skillID < ATTACK_ID && (skill.physical && (recipient.charge == 1 || recipient.charge == 4)
-            || !skill.physical && (recipient.charge == 2 || recipient.charge == 3)))
-            || (skill.skillID >= AILMENT_ID && skill.skillID < RECOVERY_ID && recipient.charge == 5))
+        if ((skill.physical && recipient.charge == 1) || (!skill.physical && recipient.charge == 2) || recipient.charge == 3 || recipient.charge == 4)
+            recipient.charge = 0;
+    }
+
+    private void RemoveCharge(RecoverySkill skill, ActorStats recipient)
+    {
+        if (skill.skillID >= AILMENT_ID && skill.skillID < RECOVERY_ID && recipient.charge == 5)
             recipient.charge = 0;
     }
 
@@ -1294,25 +1350,80 @@ public class GameManager : MonoBehaviour
         active.GetComponent<ActorStats>().guard = false;
     }
 
+    IEnumerator SwitchDemon(int val)
+    {   
+        var team = playerTeam.GetComponent<Team>();
+
+        // Don't perform on team switch (code 5)
+        if (val != 5)
+        {
+            active = SetNextDemonActive(team);
+            while(active == null || active.GetComponent<ActorStats>().stats.battleStats.hp <= 0)
+                active = SetNextDemonActive(team);
+        }
+
+        var demon = active.GetComponent<ActorStats>();
+        bool switchTeam = UpdatePress(val);
+
+        if (switchTeam)
+            yield break;
+
+        // Execute if the current demon is afflicted with ailments
+        if (demon.ailment[0] != 0) {
+            if (UnityEngine.Random.Range(0f, 100f) <= demon.ailment[1] * 25) {
+                flavorText.GetComponent<Text>().text = demon.stats.name + " Recoved From Its Status Condition!";
+                demon.ailment = new List<int>{ 0, 0, 0 };
+
+                yield return new WaitForSeconds(3.0f);
+            }
+        }
+
+        NextUp(val);
+    }
+
     public void NextUp(int val)
     {
         // On game over...
         if (val == 4)
             return;
 
-        var team = playerTeam.GetComponent<Team>();
-        
-        active = SetNextDemonActive(team);
-        while(active == null || active.GetComponent<ActorStats>().stats.battleStats.hp <= 0)
-            active = SetNextDemonActive(team);
+        var demon = active.GetComponent<ActorStats>();
 
-        UpdatePress(val);
-        UpdateName();
-
-        if (active.GetComponent<ActorStats>().guard)
+        if (demon.guard)
         {
             GuardEnd();
         }
+        
+        // If asleep...
+        if (demon.ailment[0] == 5) {
+            flavorText.GetComponent<Text>().text = demon.stats.name + " Is Sleeping...";
+            StartCoroutine(Delay(1));
+
+            ++demon.ailment[1];
+            return;
+        }
+
+        // If confused or charmed...
+        else if ((demon.ailment[0] == 2 || demon.ailment[0] == 3) && (UnityEngine.Random.Range(0f, 100f) < SIDE_EFFECT_RATE)) {
+            string statusText;
+            if (demon.ailment[0] == 3)
+                statusText = "Charm";
+            else
+                statusText= "Confusion";
+            flavorText.GetComponent<Text>().text = demon.stats.name + " Is Immobilized By " + statusText + "...";
+            StartCoroutine(Delay(1));
+
+            ++demon.ailment[1];
+            return;
+        }
+
+        else  
+            UpdateName();
+
+        if (!playerTeam.GetComponent<Team>().ai)
+            mainScreen.enabled = true;
+        else
+            AITurn();
 
         FocusOnActive();
     }
@@ -1462,35 +1573,32 @@ public class GameManager : MonoBehaviour
         rectTransform.position = new Vector3(1830 - (100 * offset), 990, 0);
     }
 
-    public void UpdatePress(int val)
+    public bool UpdatePress(int val)
     {
         Transform pressTurnPane = screen.transform.Find("PressTurns");
         switch (val)
         {
             //WEAK, PASS, CHANGE
             case 0:
-                ExtraTurn(pressTurnPane);
-                break;
+                return ExtraTurn(pressTurnPane);
             //NORMAL, RESIST, GUARD
             case 1:
-                DeleteTurns(1, pressTurnPane);
-                break;
+                return DeleteTurns(1, pressTurnPane);
             //MISS, NULL
             case 2:
-                DeleteTurns(2, pressTurnPane);
-                break;
+                return DeleteTurns(2, pressTurnPane);
             //REPEL, DRAIN
             case 3:
-                DeleteTurns(4, pressTurnPane);
-                break;
+                return DeleteTurns(4, pressTurnPane);
+            default:
+                return false;
         }
     }
 
-    private void DeleteTurns(int val, Transform pressTurnPane)
+    private bool DeleteTurns(int val, Transform pressTurnPane)
     {
         int paneIndex = pressTurnPane.transform.childCount - 1;
 
-        float waitTime = 0.0f;
         for (int i = 0; i < val; ++i)
         {
             Destroy(pressTurnPane.transform.GetChild(paneIndex).gameObject);
@@ -1501,40 +1609,28 @@ public class GameManager : MonoBehaviour
     
         if (paneIndex < 0)
         {
-            waitTime = 3.0f;
             flavorText.SetActive(false);
             SwitchTeams();
             CreatePartyTurns();
             active = playerTeam.GetComponent<Team>().player;
+            return true;
         }
 
-        StartCoroutine(AllowInput(waitTime));
+        return false;
     }
 
-    IEnumerator AllowInput(float waitTime)
-    {
-        yield return new WaitForSeconds(waitTime);
-
-        // Enable menu if the player isn't an AI
-        if (!playerTeam.GetComponent<Team>().ai)
-            mainScreen.enabled = true;
-        else
-            AITurn();
-    }
-
-    private void ExtraTurn(Transform pressTurnPane)
+    private bool ExtraTurn(Transform pressTurnPane)
     {
         for (int i = (pressTurnPane.transform.childCount - 1); i >= 0; --i)
         {
             if (pressTurnPane.transform.GetChild(i).GetComponent<Image>().sprite == pressTurnIcon.sprite)
             {
                 pressTurnPane.transform.GetChild(i).GetComponent<Image>().sprite = glowingPressTurnIcon;
-                StartCoroutine(AllowInput(0));
-                return;
+                return false;
             }
         }
 
-        DeleteTurns(1, pressTurnPane);
+        return DeleteTurns(1, pressTurnPane);
     }
 
     public void Pass()
@@ -1543,12 +1639,57 @@ public class GameManager : MonoBehaviour
         StartCoroutine(Delay(0));
     }
 
+    void UpdateIdles()
+    {
+
+        DemonIdleUpdate(playerTeam.GetComponent<Team>().player);
+        foreach(GameObject demon in playerTeam.GetComponent<Team>().activeDemons)
+        {
+            DemonIdleUpdate(demon);
+        }
+
+        DemonIdleUpdate(opponentTeam.GetComponent<Team>().player);
+        foreach(GameObject demon in opponentTeam.GetComponent<Team>().activeDemons)
+        {
+            DemonIdleUpdate(demon);
+        }
+    }
+
+    void DemonIdleUpdate(GameObject demon)
+    {
+        if (demon.GetComponent<ActorStats>().stats.battleStats.hp <= demon.GetComponent<ActorStats>().stats.baseStats.hp / 4)
+        {
+            demon.GetComponent<Animator>().SetBool("dying", true);
+        }
+        else
+            demon.GetComponent<Animator>().SetBool("dying", false);
+    }
+
     IEnumerator Delay(int val)
     {
         mainScreen.enabled = false;
+        var demon = active.GetComponent<ActorStats>();
         yield return new WaitForSeconds(3.0f);
 
-        NextUp(val);
+        UpdateIdles();
+
+        if (active.GetComponent<ActorStats>().ailment[0] == 1)
+        {
+            double damage = Math.Floor(demon.stats.baseStats.hp / PoisonRate(demon.ailment[2]));
+
+            flavorText.GetComponent<Text>().text = demon.stats.name + " Took Damage From The Poison...";
+            demon.stats.battleStats.hp -= (int) damage;
+
+            if (demon.stats.battleStats.hp <= 1) {
+                demon.stats.battleStats.hp = 1;
+                demon.ailment = new List<int>(){ 0, 0, 0 };
+            }
+
+            yield return new WaitForSeconds(3.0f);
+            DemonIdleUpdate(active);
+        }
+
+        StartCoroutine(SwitchDemon(val));
     }
 
     IEnumerator SwitchDelay(bool playerTeam)
@@ -1568,11 +1709,12 @@ public class GameManager : MonoBehaviour
 
         switchText.SetActive(false);
         flavorText.SetActive(true);
+        StartCoroutine(SwitchDemon(5));
     }
 
     public void UpdateName()
     {
-        actionCommand.text = "WHAT WILL " + active.GetComponent<ActorStats>().stats.name + " DO?";
+        actionCommand.text = "What Will " + active.GetComponent<ActorStats>().stats.name + " Do?";
     }
 
     public void QuitGame()
@@ -1584,6 +1726,7 @@ public class GameManager : MonoBehaviour
     {
         foreach (Transform child in team.transform)
         {
+            Debug.Log(child.name);
             child.GetComponent<ActorStats>().LoadCharacter();
             var childStats = child.GetComponent<ActorStats>().stats;
             childStats.battleStats.hp = childStats.baseStats.hp;
@@ -1597,6 +1740,14 @@ public class GameManager : MonoBehaviour
             if (child.GetSiblingIndex() >= 1 && child.GetSiblingIndex() < 4)
                 team.GetComponent<Team>().activeDemons.Add(child.gameObject);
         }
+
+        Team otherTeam;
+        if (team == playerTeam)
+            otherTeam = opponentTeam.GetComponent<Team>();
+        else
+            otherTeam = playerTeam.GetComponent<Team>();
+
+        team.GetComponent<Team>().FillOpposingData(otherTeam);
 
         for (int i = team.GetComponent<Team>().activeDemons.Count; i < 3; ++i)
         {
@@ -1613,9 +1764,15 @@ public class GameManager : MonoBehaviour
 
         Text winText = gameOverScreen.transform.Find("WinText").GetComponent<Text>();
 
-        if(playerTeam.GetComponent<Team>().homeTeam == true)
+        Team homeTeam;
+        if (playerTeam.GetComponent<Team>().homeTeam)
+            homeTeam = playerTeam.GetComponent<Team>();
+        else
+            homeTeam = opponentTeam.GetComponent<Team>();
+
+        if(homeTeam.player.GetComponent<ActorStats>().stats.battleStats.hp > 0)
         {
-            winText.text = "Ally Team Wins!";
+            winText.text = "Player Team Wins!";
             winText.color = Color.cyan;
         }
         else
@@ -1625,13 +1782,51 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void SetTeam()
+    {
+        DemonDex demonIndicies = demonDex.GetComponent<DemonDex>();
+        Team allyTeam = playerTeam.GetComponent<Team>();
+        Team enemyTeam = opponentTeam.GetComponent<Team>();
+
+       CreateDemon(demonIndicies.MatchIndexWithDemon(PlayerPrefs.GetInt("allyPlayer")), battlePositions.transform.GetChild(0), allyTeam, true);
+       for (int i = 0; i < 3; ++i)
+       {
+            CreateDemon(demonIndicies.MatchIndexWithDemon(PlayerPrefs.GetInt("allyTeammate" + i)), battlePositions.transform.GetChild(i + 1), allyTeam, false);
+       }
+
+       CreateDemon(demonIndicies.MatchIndexWithDemon(PlayerPrefs.GetInt("enemyPlayer")), battlePositions.transform.GetChild(4), enemyTeam, true);
+       for (int i = 0; i < 3; ++i)
+       {
+            CreateDemon(demonIndicies.MatchIndexWithDemon(PlayerPrefs.GetInt("enemyTeammate" + i)), battlePositions.transform.GetChild(i + 5), enemyTeam, false);
+       }
+    }
+
+    GameObject CreateDemon(GameObject demon, Transform battlePos, Team team, bool player)
+    {
+        GameObject readyDemon = Instantiate(demon, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
+        readyDemon.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionX |RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
+        readyDemon.transform.SetParent(team.transform);
+        readyDemon.transform.position = battlePos.position;
+        readyDemon.transform.rotation = battlePos.rotation;
+
+        if (player)
+            team.player = readyDemon;
+        else
+            team.demons.Add(readyDemon);
+
+        return demon;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         ReadCompendiums();
 
+        SetTeam();
         LoadTeam(playerTeam);
         LoadTeam(opponentTeam);
+
+        active = playerTeam.GetComponent<Team>().player;
 
         UpdateName();
         CreatePartyTurns();

@@ -3597,7 +3597,8 @@ GameObject:
   - component: {fileID: 6678568954704811491}
   - component: {fileID: -6069480878418002326}
   - component: {fileID: 5648783206968164210}
-  - component: {fileID: 3361526620728075926}
+  - component: {fileID: 8180074057497111531}
+  - component: {fileID: 1509311624545553613}
   m_Layer: 0
   m_Name: giremekhala
   m_TagString: Untagged
@@ -3669,6 +3670,9 @@ MonoBehaviour:
       magic: 0
       agility: 0
       luck: 0
+    battleStats:
+      hp: 0
+      mp: 0
     baseSkills: 
     levelSkills: 
     skills: []
@@ -3701,10 +3705,35 @@ MonoBehaviour:
       support: 0
   faceSprite: {fileID: 734260285093855243, guid: de1b0137fff4cfb459c20a5ffc4921a4, type: 3}
   guard: 0
+  ailment: 000000000000000000000000
+  charge: 0
+  protective: 0
+  damageDown: 0
+  taunt: 0000000000000000
+  attack: 0000000000000000
+  defense: 0000000000000000
+  accEvas: 0000000000000000
+  passives: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   references:
     version: 1
---- !u!64 &3361526620728075926
-MeshCollider:
+--- !u!54 &8180074057497111531
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6333428563396628313}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 14
+  m_CollisionDetection: 0
+--- !u!65 &1509311624545553613
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -3713,10 +3742,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 8289108688099648751, guid: 0da94a518f458834293a2c236b7216b2, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 1.5340537, y: 2.6302693, z: 1.2389188}
+  m_Center: {x: -0.02810806, y: 1.3070263, z: 0.119459406}
 --- !u!1 &6338574255922826816
 GameObject:
   m_ObjectHideFlags: 0

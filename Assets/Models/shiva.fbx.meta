@@ -44,7 +44,7 @@ ModelImporter:
     second: ShivaIdleB
   - first:
       74: -5498648194740652199
-    second: ShivaDmg
+    second: ShivaDamage
   - first:
       74: -3491095608359413727
     second: ShivaDying
@@ -57,6 +57,9 @@ ModelImporter:
   - first:
       74: -7472166852560985415
     second: ShivaRun
+  - first:
+      74: 2927845342390821967
+    second: ShivaAttack
   externalObjects:
   - first:
       type: UnityEngine:Texture2D
@@ -159,7 +162,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: ShivaDmg
+      name: ShivaDamage
       takeName: SK_dev178.ao|AN_dev178_03dmg
       internalID: 0
       firstFrame: 0
@@ -199,7 +202,7 @@ ModelImporter:
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 0
+      loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0
@@ -217,7 +220,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: ShivaAtk
+      name: ShivaAttack
       takeName: SK_dev178.ao|AN_dev178_05attack
       internalID: 0
       firstFrame: 0
