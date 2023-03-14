@@ -6735,6 +6735,8 @@ GameObject:
   - component: {fileID: 6388842098486020641}
   - component: {fileID: 962775299023331469}
   - component: {fileID: 438299303250618166}
+  - component: {fileID: 2334795242763788655}
+  - component: {fileID: 8645678550288567268}
   m_Layer: 0
   m_Name: daemon
   m_TagString: Untagged
@@ -6794,10 +6796,10 @@ MonoBehaviour:
     name: 
     desc: 
     race: 0
+    level: 0
     demID: 0
     religion: 
     alignment: 
-    level: 0
     baseStats:
       hp: 0
       mp: 0
@@ -6852,6 +6854,35 @@ MonoBehaviour:
   passives: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   references:
     version: 1
+--- !u!54 &2334795242763788655
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6044510908479328411}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 122
+  m_CollisionDetection: 0
+--- !u!65 &8645678550288567268
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6044510908479328411}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.0812902, y: 1.8670974, z: 1.0609677}
+  m_Center: {x: -0.04064524, y: 0.9335487, z: -0.030483961}
 --- !u!1 &6164802320509580241
 GameObject:
   m_ObjectHideFlags: 0

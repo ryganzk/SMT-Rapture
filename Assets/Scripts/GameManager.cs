@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using static AI;
 
@@ -105,7 +106,7 @@ public class GameManager : MonoBehaviour
         public int strength;
     }
 
-    void ReadCompendiums()
+    public void ReadCompendiums()
     {
         skillCompendium = new List<Skill> {
             JsonUtility.FromJson<AttackSkill>((Resources.Load("Skills/physical/lunge") as TextAsset).text),
@@ -712,9 +713,9 @@ public class GameManager : MonoBehaviour
                 + (1 * resMod);
 
         if (result != "")
-            Debug.Log(affected.name + " TOOK " + damage + " DAMAGE! " + result + "!");
+            Debug.Log(affected.stats.name + " TOOK " + damage + " DAMAGE! " + result + "!");
         else
-            Debug.Log(affected.name + " TOOK " + damage + " DAMAGE!");
+            Debug.Log(affected.stats.name + " TOOK " + damage + " DAMAGE!");
 
         affected.stats.battleStats.hp -= (int) damage;
 
@@ -806,6 +807,34 @@ public class GameManager : MonoBehaviour
                 return defender.stats.resistances.dark;
             default:
                 return 1;
+        }
+    }
+
+    public void SetResistance(ActorStats demon, PassiveSkill skill)
+    {
+        switch (skill.passive[0] - 4)
+        {
+            case 0:
+                demon.stats.resistances.physical = skill.strength;
+                return;
+            case 1:
+                demon.stats.resistances.fire = skill.strength;
+                return;
+            case 2:
+                demon.stats.resistances.ice = skill.strength;
+                return;
+            case 3:
+                demon.stats.resistances.electric = skill.strength;
+                return;
+            case 4:
+                demon.stats.resistances.force = skill.strength;
+                return;
+            case 5:
+                demon.stats.resistances.light = skill.strength;
+                return;
+            case 6:
+                demon.stats.resistances.dark = skill.strength;
+                return;
         }
     }
 
@@ -1013,7 +1042,7 @@ public class GameManager : MonoBehaviour
             // Nulls ailment (remember to check other possible ailments)
             if (resType == 3)
             {
-                Debug.Log(defender.name + " nulls the ailment...");
+                Debug.Log(defender.stats.name + " nulls the ailment...");
                 result = 2;
             }
             else if (resType == 0)
@@ -1029,7 +1058,7 @@ public class GameManager : MonoBehaviour
                     return 0;
                 }
                 else
-                    Debug.Log(defender.name + " avoided the ailment...");
+                    Debug.Log(defender.stats.name + " avoided the ailment...");
             }
         }
 
@@ -1042,7 +1071,7 @@ public class GameManager : MonoBehaviour
 
     void InflictAilment(AilmentSkill skill, GameObject obj, ActorStats attacker, ActorStats defender, int ailmentIndex)
     {
-        Debug.Log(defender.name + " was inflicted...");
+        Debug.Log(defender.stats.name + " was inflicted...");
         PseudoSupport(skill, obj);
         CurseSiphoon(attacker);
         defender.ailment = new List<int>{ ailmentIndex + 1, 0, attacker.passives[17] };
@@ -1293,6 +1322,14 @@ public class GameManager : MonoBehaviour
     private void CalculateTaunt(ActorStats demon)
     {
         demon.taunt = new List<int>{ 1, 3 };
+    }
+
+    private void ConvertSkillToPassive(ActorStats demon, PassiveSkill skill)
+    {
+        if (skill.passive[0] >= 4 && skill.passive[0] <= 10 && skill.strength >= 2)
+            SetResistance(demon, skill);
+        else
+            demon.passives[skill.passive[0]] += (skill.strength + 1);
     }
 
     public void FocusOnActive()
@@ -1726,19 +1763,21 @@ public class GameManager : MonoBehaviour
     {
         foreach (Transform child in team.transform)
         {
-            Debug.Log(child.name);
             child.GetComponent<ActorStats>().LoadCharacter();
-            var childStats = child.GetComponent<ActorStats>().stats;
-            childStats.battleStats.hp = childStats.baseStats.hp;
-            childStats.battleStats.mp = childStats.baseStats.mp;
-
-            foreach (int skillID in childStats.baseSkills)
-            {
-                childStats.skills.Add(skillCompendium[skillID]);
-            }
 
             if (child.GetSiblingIndex() >= 1 && child.GetSiblingIndex() < 4)
                 team.GetComponent<Team>().activeDemons.Add(child.gameObject);
+        }
+
+        GetTeamPrefs(team);
+
+        foreach (Transform child in team.transform)
+        {
+            var childStats = child.GetComponent<ActorStats>();
+            childStats.stats.baseStats.hp = (int) Math.Floor(childStats.stats.baseStats.hp * (1 + (childStats.passives[0] * 0.15)));
+            childStats.stats.baseStats.mp = (int) Math.Floor(childStats.stats.baseStats.mp * (1 + (childStats.passives[1] * 0.15)));
+            childStats.stats.battleStats.hp = childStats.stats.baseStats.hp;
+            childStats.stats.battleStats.mp = childStats.stats.baseStats.mp;
         }
 
         Team otherTeam;
@@ -1804,7 +1843,7 @@ public class GameManager : MonoBehaviour
     GameObject CreateDemon(GameObject demon, Transform battlePos, Team team, bool player)
     {
         GameObject readyDemon = Instantiate(demon, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
-        readyDemon.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionX |RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
+        readyDemon.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
         readyDemon.transform.SetParent(team.transform);
         readyDemon.transform.position = battlePos.position;
         readyDemon.transform.rotation = battlePos.rotation;
@@ -1817,19 +1856,57 @@ public class GameManager : MonoBehaviour
         return demon;
     }
 
+    void GetTeamPrefs(GameObject team)
+    {
+        if (team == playerTeam)
+        {
+            GetDemonPrefs(team.GetComponent<Team>().player.GetComponent<ActorStats>(), "allyPlayer");
+            
+            for (int i = 0; i < 3; ++i)
+            {
+                GetDemonPrefs(team.GetComponent<Team>().demons[i].GetComponent<ActorStats>(), "allyTeammate" + i);
+            }
+        }
+    }
+
+    void GetDemonPrefs(ActorStats dem, string name)
+    {
+        dem.stats.level = PlayerPrefs.GetInt(name + "Level");
+        dem.stats.baseStats.hp = PlayerPrefs.GetInt(name + "Hp");
+        dem.stats.baseStats.mp = PlayerPrefs.GetInt(name + "Mp");
+        dem.stats.baseStats.strength = PlayerPrefs.GetInt(name + "Strength");
+        dem.stats.baseStats.vitality = PlayerPrefs.GetInt(name + "Vitality");
+        dem.stats.baseStats.magic = PlayerPrefs.GetInt(name + "Magic");
+        dem.stats.baseStats.agility = PlayerPrefs.GetInt(name + "Agility");
+        dem.stats.baseStats.luck = PlayerPrefs.GetInt(name + "Luck");
+
+        for (int i = 0; i < 8; ++i)
+        {
+            int skillID = PlayerPrefs.GetInt(name + "Skill" + i);
+            if (skillID > SUPPORT_ID)
+                ConvertSkillToPassive(dem, (PassiveSkill) skillCompendium[skillID]);
+            else if (skillID != -1)
+                dem.stats.skills.Add(skillCompendium[skillID]);
+        }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        ReadCompendiums();
+        if (SceneManager.GetActiveScene().name == "BattleScene")
+        {
+            ReadCompendiums();
 
-        SetTeam();
-        LoadTeam(playerTeam);
-        LoadTeam(opponentTeam);
+            SetTeam();
+            LoadTeam(playerTeam);
+            LoadTeam(opponentTeam);
 
-        active = playerTeam.GetComponent<Team>().player;
+            active = playerTeam.GetComponent<Team>().player;
 
-        UpdateName();
-        CreatePartyTurns();
-        FocusOnActive();
+            UpdateName();
+            CreatePartyTurns();
+            FocusOnActive();
+
+        }
     }
 }

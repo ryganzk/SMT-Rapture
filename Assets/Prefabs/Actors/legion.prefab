@@ -1758,6 +1758,8 @@ GameObject:
   - component: {fileID: 5941346938799455584}
   - component: {fileID: 757829118065049706}
   - component: {fileID: 8190455443526126579}
+  - component: {fileID: 1816878118856272391}
+  - component: {fileID: 2369005298282101471}
   m_Layer: 0
   m_Name: legion
   m_TagString: Untagged
@@ -1817,10 +1819,10 @@ MonoBehaviour:
     name: 
     desc: 
     race: 0
+    level: 0
     demID: 0
     religion: 
     alignment: 
-    level: 0
     baseStats:
       hp: 0
       mp: 0
@@ -1875,6 +1877,35 @@ MonoBehaviour:
   passives: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   references:
     version: 1
+--- !u!54 &1816878118856272391
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6428949093494466522}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 122
+  m_CollisionDetection: 0
+--- !u!65 &2369005298282101471
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6428949093494466522}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.7698474, y: 2.8114057, z: 1.633992}
+  m_Center: {x: 0.022642493, y: 1.4057028, z: -0.045285136}
 --- !u!1 &6489308301278169842
 GameObject:
   m_ObjectHideFlags: 0

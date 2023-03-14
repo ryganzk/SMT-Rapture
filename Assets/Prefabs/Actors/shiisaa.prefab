@@ -2462,6 +2462,8 @@ GameObject:
   - component: {fileID: 7592226938753083636}
   - component: {fileID: 8431584140787090214}
   - component: {fileID: 9112133176066541647}
+  - component: {fileID: 2372925044555780159}
+  - component: {fileID: 6160792519352881392}
   m_Layer: 0
   m_Name: shiisaa
   m_TagString: Untagged
@@ -2521,10 +2523,10 @@ MonoBehaviour:
     name: 
     desc: 
     race: 0
+    level: 0
     demID: 0
     religion: 
     alignment: 
-    level: 0
     baseStats:
       hp: 0
       mp: 0
@@ -2579,6 +2581,35 @@ MonoBehaviour:
   passives: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   references:
     version: 1
+--- !u!54 &2372925044555780159
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7068068114284884558}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 122
+  m_CollisionDetection: 0
+--- !u!65 &6160792519352881392
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7068068114284884558}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.71296936, y: 0.8874389, z: 1.1744697}
+  m_Center: {x: -0.0028140247, y: 0.44371945, z: 0.09849095}
 --- !u!1 &7154707854458625713
 GameObject:
   m_ObjectHideFlags: 0
