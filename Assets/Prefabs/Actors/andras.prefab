@@ -2325,6 +2325,8 @@ GameObject:
   - component: {fileID: 5700289330567582315}
   - component: {fileID: 2612800510954371098}
   - component: {fileID: 2940625994831339864}
+  - component: {fileID: 4670433491582447853}
+  - component: {fileID: 1938522455791532046}
   m_Layer: 0
   m_Name: andras
   m_TagString: Untagged
@@ -2384,10 +2386,10 @@ MonoBehaviour:
     name: 
     desc: 
     race: 0
+    level: 0
     demID: 0
     religion: 
     alignment: 
-    level: 0
     baseStats:
       hp: 0
       mp: 0
@@ -2442,6 +2444,35 @@ MonoBehaviour:
   passives: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   references:
     version: 1
+--- !u!54 &4670433491582447853
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4922626108309784785}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 122
+  m_CollisionDetection: 0
+--- !u!65 &1938522455791532046
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4922626108309784785}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.4914838, y: 2.300628, z: 0.5208213}
+  m_Center: {x: 0, y: 1.150314, z: -0.08312285}
 --- !u!1 &5027029545954682373
 GameObject:
   m_ObjectHideFlags: 0

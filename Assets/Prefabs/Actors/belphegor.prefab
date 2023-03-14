@@ -910,6 +910,8 @@ GameObject:
   - component: {fileID: 1563951794700139687}
   - component: {fileID: 2921956260229113527}
   - component: {fileID: 4254074208662467888}
+  - component: {fileID: 8428741487983860235}
+  - component: {fileID: 6515383853160711149}
   m_Layer: 0
   m_Name: belphegor
   m_TagString: Untagged
@@ -969,10 +971,10 @@ MonoBehaviour:
     name: 
     desc: 
     race: 0
+    level: 0
     demID: 0
     religion: 
     alignment: 
-    level: 0
     baseStats:
       hp: 0
       mp: 0
@@ -1027,6 +1029,35 @@ MonoBehaviour:
   passives: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   references:
     version: 1
+--- !u!54 &8428741487983860235
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2233668263942809117}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 122
+  m_CollisionDetection: 0
+--- !u!65 &6515383853160711149
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2233668263942809117}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.4457399, y: 3.674439, z: 1.7293919}
+  m_Center: {x: 0.0405218, y: 1.8372195, z: 0.22286981}
 --- !u!1 &2281305018671192532
 GameObject:
   m_ObjectHideFlags: 0

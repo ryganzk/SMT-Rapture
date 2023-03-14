@@ -15162,6 +15162,8 @@ GameObject:
   - component: {fileID: 8366825421222791792}
   - component: {fileID: -838822354252590728}
   - component: {fileID: 118198454956178162}
+  - component: {fileID: -3277597786302793657}
+  - component: {fileID: 7684418573894095678}
   m_Layer: 0
   m_Name: abdiel
   m_TagString: Untagged
@@ -15222,10 +15224,10 @@ MonoBehaviour:
     name: 
     desc: 
     race: 0
+    level: 0
     demID: 0
     religion: 
     alignment: 
-    level: 0
     baseStats:
       hp: 0
       mp: 0
@@ -15280,6 +15282,35 @@ MonoBehaviour:
   passives: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   references:
     version: 1
+--- !u!54 &-3277597786302793657
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9175872897019875530}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 122
+  m_CollisionDetection: 0
+--- !u!65 &7684418573894095678
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9175872897019875530}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.5750022, y: 1.9874923, z: 0.34318528}
+  m_Center: {x: 0.048295222, y: 1, z: 0.01931803}
 --- !u!1 &9209185169507486482
 GameObject:
   m_ObjectHideFlags: 0
