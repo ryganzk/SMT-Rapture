@@ -100,6 +100,7 @@ public class ActorStats : MonoBehaviour
         public int race;
         public int level;
         public int demID;
+        public int dexID;
         public List<int> religion;
         public List<int> alignment;
         public BaseStats baseStats;
@@ -111,6 +112,7 @@ public class ActorStats : MonoBehaviour
         public Resistances resistances;
         public AilmentResistances ailmentResistances;
         public Potentials potentials;
+        public int damageStatus;
     }
 
     public void LoadCharacter()

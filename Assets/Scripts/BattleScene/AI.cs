@@ -5,6 +5,9 @@ using static GameManager;
 
 public class AI : MonoBehaviour
 {
+    // AI Type
+    public int aiType = 0;
+
     // Move Factors
     public float attackFactor;
     public float ailmentFactor;
@@ -36,6 +39,38 @@ public class AI : MonoBehaviour
 
     public void AIMove()
     {
+        switch(aiType)
+        {
+            case 1:
+                SkillDependentAI();
+                return;
+            case 2:
+                TargetDependentAI();
+                return;
+            default:
+                RandomAI();
+                return;
+        }
+    }
+
+    private void RandomAI()
+    {
+        List<Skill> skills = gameManager.active.GetComponent<ActorStats>().stats.skills;
+        NonPassiveSkill randMove = null;
+        if (skills.Count == 0 || Mathf.Floor(UnityEngine.Random.Range(0f, 10f)) >= 9f)
+            randMove = gameManager.NormalAttack();
+        else
+            randMove = (NonPassiveSkill) skills[(int) Mathf.Floor(UnityEngine.Random.Range(0f, skills.Count))];
+
+        List<GameObject> targets = GetTargetList(randMove);
+        GameObject target = targets[(int) Mathf.Floor(UnityEngine.Random.Range(0f, targets.Count))];
+        Debug.Log("Target: " + target.name);
+
+        gameManager.ExecuteMove(target, randMove, gameManager.opponentTeam.GetComponent<Team>().activeDemons);
+    }
+
+    private void SkillDependentAI()
+    {
         GameObject target = null;
         NonPassiveSkill randMove = null;
         List<Skill> skills = null;
@@ -64,6 +99,11 @@ public class AI : MonoBehaviour
         }
         
         gameManager.ExecuteMove(target, randMove, gameManager.opponentTeam.GetComponent<Team>().activeDemons);
+    }
+
+    private void TargetDependentAI()
+    {
+
     }
 
     List<Skill> DetermineMoveType(float attackFactor, float ailmentFactor, float healFactor, float supportFactor)
@@ -109,6 +149,14 @@ public class AI : MonoBehaviour
             }
         }
         return skills;
+    }
+
+    List<GameObject> GetTargetList(NonPassiveSkill skill)
+    {
+        if (skill.skillID < GameManager.RECOVERY_ID || (skill.skillID >= GameManager.SUPPORT_ID && !((SupportSkill) skill).buff))
+            return gameManager.AliveDemons(gameManager.opponentTeam.GetComponent<Team>().activeDemons);
+        else
+            return gameManager.AliveDemons(gameManager.playerTeam.GetComponent<Team>().activeDemons);
     }
 
     List<Skill> DetermineMoves(int moveType)

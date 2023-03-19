@@ -28,7 +28,6 @@ public class DemonScreen : MonoBehaviour
     public class SavedData
     {
         public string name = "";
-        public int demID = -1;
         public int level = 0;
         public int hp = 0;
         public int mp = 0;
@@ -134,6 +133,14 @@ public class DemonScreen : MonoBehaviour
         actorBaseStats[index].magic = dem.stats.baseStats.magic;
         actorBaseStats[index].agility = dem.stats.baseStats.agility;
         actorBaseStats[index].luck = dem.stats.baseStats.luck;
+
+        var activeDemon = savedDemons.transform.GetChild(index).GetComponent<ActorStats>();
+        actorBaseStats[index].hpMpPnts = ((activeDemon.stats.level - dem.stats.level) * 5) - (activeDemon.stats.baseStats.hp - dem.stats.baseStats.hp)
+            - (activeDemon.stats.baseStats.mp - dem.stats.baseStats.mp);
+        
+        actorBaseStats[index].statPnts = ((activeDemon.stats.level - dem.stats.level) * 3) - (activeDemon.stats.baseStats.strength - dem.stats.baseStats.strength)
+            - (activeDemon.stats.baseStats.vitality - dem.stats.baseStats.vitality) - (activeDemon.stats.baseStats.magic - dem.stats.baseStats.magic)
+            - (activeDemon.stats.baseStats.agility - dem.stats.baseStats.agility) - (activeDemon.stats.baseStats.luck - dem.stats.baseStats.luck);
 
         foreach(Skill skill in dem.stats.skills)
         {

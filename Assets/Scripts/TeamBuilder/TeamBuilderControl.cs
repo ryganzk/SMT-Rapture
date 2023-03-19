@@ -19,6 +19,8 @@ public class TeamBuilderControl : MonoBehaviour
     public int screenIndex;
     public GameObject playerDemons;
     public GameObject enemyDemons;
+    public GameObject demonDex;
+    public GameObject exportErrorText;
 
     public void Start()
     {
@@ -32,9 +34,9 @@ public class TeamBuilderControl : MonoBehaviour
             currDemon.GetComponent<ActorStats>().LoadCharacter();
 
             if (i == 0)
-                allyDemonEditor.GetComponent<DemonScreen>().actorBaseStats[i].demID = 31;
+                currDemon.GetComponent<ActorStats>().stats.dexID = 71;
             else
-                allyDemonEditor.GetComponent<DemonScreen>().actorBaseStats[i].demID = 41;
+                currDemon.GetComponent<ActorStats>().stats.dexID = 92;
         
             foreach (int skillID in currDemon.GetComponent<ActorStats>().stats.baseSkills)
             {
@@ -50,6 +52,11 @@ public class TeamBuilderControl : MonoBehaviour
             GameObject currDemon = enemyDemons.transform.GetChild(i).gameObject;
             currDemon.GetComponent<ActorStats>().LoadCharacter();
 
+            if (i == 0)
+                currDemon.GetComponent<ActorStats>().stats.dexID = 71;
+            else
+                currDemon.GetComponent<ActorStats>().stats.dexID = 92;
+
             foreach (int skillID in currDemon.GetComponent<ActorStats>().stats.baseSkills)
             {
                 currDemon.GetComponent<ActorStats>().stats.skills.Add(gameManager.skillCompendium[skillID]);
@@ -57,13 +64,16 @@ public class TeamBuilderControl : MonoBehaviour
 
             enemyDemonEditor.GetComponent<DemonScreen>().SetStatDefaults(currDemon.GetComponent<ActorStats>(), i);
         }
+
+        allyDemonEditor.transform.GetChild(0).Find("DemonType").GetComponent<DemonDropdown>().PopulateDropDown();
+        enemyDemonEditor.transform.GetChild(0).Find("DemonType").GetComponent<DemonDropdown>().PopulateDropDown();
     }
 
     public void StartGame()
     {
         // PLAYER TEAM
         var playerStats = playerDemons.transform.GetChild(0).GetComponent<ActorStats>();
-        PlayerPrefs.SetInt("allyPlayer", allyDemonEditor.GetComponent<DemonScreen>().actorBaseStats[0].demID);
+        PlayerPrefs.SetInt("allyPlayer", playerStats.stats.dexID);
         PlayerPrefs.SetInt("allyPlayerLevel", playerStats.stats.level);
         PlayerPrefs.SetInt("allyPlayerHp", playerStats.stats.baseStats.hp);
         PlayerPrefs.SetInt("allyPlayerMp", playerStats.stats.baseStats.mp);
@@ -85,7 +95,7 @@ public class TeamBuilderControl : MonoBehaviour
         for (int i = 0; i < 3; ++i)
         {
             var teammateStats = playerDemons.transform.GetChild(i + 1).GetComponent<ActorStats>();
-            PlayerPrefs.SetInt("allyTeammate" + i, allyDemonEditor.GetComponent<DemonScreen>().actorBaseStats[i + 1].demID);
+            PlayerPrefs.SetInt("allyTeammate" + i, teammateStats.stats.dexID);
             PlayerPrefs.SetInt("allyTeammate" + i + "Level", teammateStats.stats.level);
             PlayerPrefs.SetInt("allyTeammate" + i + "Hp", teammateStats.stats.baseStats.hp);
             PlayerPrefs.SetInt("allyTeammate" + i + "Mp", teammateStats.stats.baseStats.mp);
@@ -95,10 +105,10 @@ public class TeamBuilderControl : MonoBehaviour
             PlayerPrefs.SetInt("allyTeammate" + i + "Agility", teammateStats.stats.baseStats.agility);
             PlayerPrefs.SetInt("allyTeammate" + i + "Luck", teammateStats.stats.baseStats.luck);
 
-            for(int j = 0; j < 8; ++i)
+            for(int j = 0; j < 8; ++j)
             { 
-                if (i < playerStats.stats.skills.Count)
-                    PlayerPrefs.SetInt("allyTeammate" + i + "Skill" + j, playerStats.stats.skills[j].skillID);
+                if (j < teammateStats.stats.skills.Count)
+                    PlayerPrefs.SetInt("allyTeammate" + i + "Skill" + j, teammateStats.stats.skills[j].skillID);
                 else
                     PlayerPrefs.SetInt("allyTeammate" + i + "Skill" + j, -1);
             }
@@ -106,7 +116,7 @@ public class TeamBuilderControl : MonoBehaviour
 
         // ENEMY TEAM
         var enemyStats = enemyDemons.transform.GetChild(0).GetComponent<ActorStats>();
-        PlayerPrefs.SetInt("enemyPlayer", enemyDemonEditor.GetComponent<DemonScreen>().actorBaseStats[0].demID);
+        PlayerPrefs.SetInt("enemyPlayer", enemyStats.stats.dexID);
         PlayerPrefs.SetInt("enemyPlayerLevel", enemyStats.stats.level);
         PlayerPrefs.SetInt("enemyPlayerHp", enemyStats.stats.baseStats.hp);
         PlayerPrefs.SetInt("enemyPlayerMp", enemyStats.stats.baseStats.mp);
@@ -122,20 +132,12 @@ public class TeamBuilderControl : MonoBehaviour
                 PlayerPrefs.SetInt("enemyPlayerSkill" + i, enemyStats.stats.skills[i].skillID);
             else
                 PlayerPrefs.SetInt("enemyPlayerSkill" + i, -1);
-
-            for(int j = 0; j < 8; ++i)
-            { 
-                if (i < enemyStats.stats.skills.Count)
-                    PlayerPrefs.SetInt("allyTeammate" + i + "Skill" + j, enemyStats.stats.skills[j].skillID);
-                else
-                    PlayerPrefs.SetInt("allyTeammate" + i + "Skill" + j, -1);
-            }
         }
 
         for (int i = 0; i < 3; ++i)
         {
             var teammateStats = enemyDemons.transform.GetChild(i + 1).GetComponent<ActorStats>();
-            PlayerPrefs.SetInt("enemyTeammate" + i, allyDemonEditor.GetComponent<DemonScreen>().actorBaseStats[i + 1].demID);
+            PlayerPrefs.SetInt("enemyTeammate" + i, teammateStats.stats.dexID);
             PlayerPrefs.SetInt("enemyTeammate" + i + "Level", teammateStats.stats.level);
             PlayerPrefs.SetInt("enemyTeammate" + i + "Hp", teammateStats.stats.baseStats.hp);
             PlayerPrefs.SetInt("enemyTeammate" + i + "Mp", teammateStats.stats.baseStats.mp);
@@ -144,6 +146,14 @@ public class TeamBuilderControl : MonoBehaviour
             PlayerPrefs.SetInt("enemyTeammate" + i + "Magic", teammateStats.stats.baseStats.magic);
             PlayerPrefs.SetInt("enemyTeammate" + i + "Agility", teammateStats.stats.baseStats.agility);
             PlayerPrefs.SetInt("enemyTeammate" + i + "Luck", teammateStats.stats.baseStats.luck);
+
+            for(int j = 0; j < 8; ++j)
+            { 
+                if (j < teammateStats.stats.skills.Count)
+                    PlayerPrefs.SetInt("enemyTeammate" + i + "Skill" + j, teammateStats.stats.skills[j].skillID);
+                else
+                    PlayerPrefs.SetInt("enemyTeammate" + i + "Skill" + j, -1);
+            }
         }
 
         SceneManager.LoadScene("BattleScene");
@@ -152,28 +162,27 @@ public class TeamBuilderControl : MonoBehaviour
     public void SetAllyIndex(int index)
     {
         screenIndex = index;
-        allyDemonEditor.GetChild(screenIndex).Find("DemonType").GetComponent<Dropdown>().value = allyDemonEditor.GetComponent<DemonScreen>().actorBaseStats[screenIndex].demID;
+        allyDemonEditor.GetChild(0).Find("DemonType").GetComponent<Dropdown>().value = playerDemons.transform.GetChild(screenIndex).GetComponent<ActorStats>().stats.dexID;
     }
 
     public void SetEnemyIndex(int index)
     {
         screenIndex = index;
-        enemyDemonEditor.GetChild(screenIndex).Find("DemonType").GetComponent<Dropdown>().value = enemyDemonEditor.GetComponent<DemonScreen>().actorBaseStats[screenIndex].demID;
+        enemyDemonEditor.GetChild(0).Find("DemonType").GetComponent<Dropdown>().value = enemyDemons.transform.GetChild(screenIndex).GetComponent<ActorStats>().stats.dexID;
     }
 
     public void CloseAllyChangeScreen()
     {
-        allyDemonEditor.GetComponent<DemonScreen>().actorBaseStats[screenIndex].demID = allyDemonEditor.GetChild(0).Find("DemonType").GetComponent<Dropdown>().value;
+        playerDemons.transform.GetChild(screenIndex).GetComponent<ActorStats>().stats.dexID = allyDemonEditor.GetChild(0).Find("DemonType").GetComponent<Dropdown>().value;
     }
 
     public void CloseEnemyChangeScreen()
     {
-        enemyDemonEditor.GetComponent<DemonScreen>().actorBaseStats[screenIndex].demID = enemyDemonEditor.GetChild(0).Find("DemonType").GetComponent<Dropdown>().value;
+        enemyDemons.transform.GetChild(screenIndex).GetComponent<ActorStats>().stats.dexID = enemyDemonEditor.GetChild(0).Find("DemonType").GetComponent<Dropdown>().value;
     }
 
     public void PopulateImportDropDown(Dropdown importDrop)
     {
-        // var importDrop = allyFileTools.GetChild(1).Find("DirectorySelect").GetComponent<Dropdown>();
         importDrop.options = new List<Dropdown.OptionData>();
         string[] subdirectories = Directory.GetDirectories(Application.persistentDataPath + "/teams/");
 
@@ -183,11 +192,23 @@ public class TeamBuilderControl : MonoBehaviour
             var dir = new DirectoryInfo(subdirectory);
             var opData = new Dropdown.OptionData(dir.Name);
             importDrop.options.Add(opData);
+
+            if (subdirectory == subdirectories[0])
+                importDrop.transform.GetChild(0).GetComponent<Text>().text = dir.Name;
         }
+        importDrop.value = 0;
     }
 
-    public void ExportJson(string name)
+    public void ExportPlayerJson(InputField input)
     {
+        string name = input.text;
+        if (name == "")
+        {
+            exportErrorText.SetActive(true);
+            return;
+        }
+
+        exportErrorText.SetActive(false);
         Directory.CreateDirectory(Application.persistentDataPath + "/teams/" + name);
         var jsonData = JsonUtility.ToJson(playerDemons.transform.GetChild(0).GetComponent<ActorStats>());
         File.WriteAllText(Application.persistentDataPath + "/teams/" + name + "/player.json", jsonData);
@@ -199,14 +220,60 @@ public class TeamBuilderControl : MonoBehaviour
         }
     }
 
-    public void ImportJson(Dropdown importDrop)
+    public void ExportEnemyJson(InputField input)
     {
-        // Remember to reset allocatable points
-        allyDemonEditor.GetComponent<DemonScreen>().SetStatDefaults(playerDemons.transform.GetChild(0).gameObject.GetComponent<ActorStats>(), 0);
+        string name = input.text;
+        if (name == "")
+        {
+            exportErrorText.SetActive(true);
+            return;
+        }
 
+        exportErrorText.SetActive(false);
+        Directory.CreateDirectory(Application.persistentDataPath + "/teams/" + name);
+        var jsonData = JsonUtility.ToJson(enemyDemons.transform.GetChild(0).GetComponent<ActorStats>());
+        File.WriteAllText(Application.persistentDataPath + "/teams/" + name + "/player.json", jsonData);
+
+        for (int i = 0; i < 3; ++i)
+        {
+            jsonData = JsonUtility.ToJson(enemyDemons.transform.GetChild(i + 1).GetComponent<ActorStats>());
+            File.WriteAllText(Application.persistentDataPath + "/teams/" + name + "/teammate" + i + ".json", jsonData);
+        }
+    }
+
+    public void ImportPlayerJson(Dropdown importDrop)
+    {
         string name = importDrop.options[importDrop.value].text;
         var jsonData = File.ReadAllText(Application.persistentDataPath + "/teams/" + name + "/player.json");
-        JsonUtility.FromJsonOverwrite(jsonData, playerDemons.transform.GetChild(0).GetComponent<ActorStats>());
-        allyDemonEditor.GetComponent<DemonScreen>().actorBaseStats[screenIndex].demID = 31;
+        var changedDemon = playerDemons.transform.GetChild(0).GetComponent<ActorStats>();
+        JsonUtility.FromJsonOverwrite(jsonData, changedDemon);
+        var baseDemon = demonDex.GetComponent<DemonDex>().demonDex[changedDemon.stats.dexID].GetComponent<ActorStats>();
+        baseDemon.LoadCharacter();
+        allyDemonEditor.GetComponent<DemonScreen>().SetStatDefaults(baseDemon, 0);
+
+        for (int i = 0; i < 3; ++i)
+        {
+            jsonData = File.ReadAllText(Application.persistentDataPath + "/teams/" + name + "/teammate" + i + ".json");
+            JsonUtility.FromJsonOverwrite(jsonData, playerDemons.transform.GetChild(i + 1).GetComponent<ActorStats>());
+            allyDemonEditor.GetComponent<DemonScreen>().SetStatDefaults(playerDemons.transform.GetChild(i + 1).GetComponent<ActorStats>(), i + 1);
+        }
+    }
+
+    public void ImportEnemyJson(Dropdown importDrop)
+    {
+        string name = importDrop.options[importDrop.value].text;
+        var jsonData = File.ReadAllText(Application.persistentDataPath + "/teams/" + name + "/player.json");
+        var changedDemon = enemyDemons.transform.GetChild(0).GetComponent<ActorStats>();
+        JsonUtility.FromJsonOverwrite(jsonData, changedDemon);
+        var baseDemon = demonDex.GetComponent<DemonDex>().demonDex[changedDemon.stats.dexID].GetComponent<ActorStats>();
+        baseDemon.LoadCharacter();
+        enemyDemonEditor.GetComponent<DemonScreen>().SetStatDefaults(baseDemon, 0);
+
+        for (int i = 0; i < 3; ++i)
+        {
+            jsonData = File.ReadAllText(Application.persistentDataPath + "/teams/" + name + "/teammate" + i + ".json");
+            JsonUtility.FromJsonOverwrite(jsonData, enemyDemons.transform.GetChild(i + 1).GetComponent<ActorStats>());
+            enemyDemonEditor.GetComponent<DemonScreen>().SetStatDefaults(enemyDemons.transform.GetChild(i + 1).GetComponent<ActorStats>(), i + 1);
+        }
     }
 }

@@ -16,6 +16,8 @@ public class GameManager : MonoBehaviour
     public const int SIDE_EFFECT_RATE = 40;
     private int turn = 1;
     private int activeIndex = 3;
+    private bool firstRun = true;
+    private bool autoRestart = false;
 
     public Camera cam;
     public GameObject active;
@@ -31,6 +33,7 @@ public class GameManager : MonoBehaviour
     public GameObject flavorText, switchText;
     public GameObject demonDex;
     public GameObject battlePositions;
+    public Transform healthBars;
 
     [SerializeReference]
     public List<Skill> skillCompendium;
@@ -460,7 +463,12 @@ public class GameManager : MonoBehaviour
 
         // Allows player targeting if not all demons are active OR self-inflicted boost/heal
         if (aliveList.Count != 3 || objs[0].transform.parent.gameObject == playerTeam)
-            aliveList.Add(opponentTeam.GetComponent<Team>().player);
+        {
+            if (objs == playerTeam.GetComponent<Team>().activeDemons)
+                aliveList.Add(playerTeam.GetComponent<Team>().player);
+            else
+                aliveList.Add(opponentTeam.GetComponent<Team>().player);
+        }
         
         return aliveList;
     }
@@ -482,6 +490,22 @@ public class GameManager : MonoBehaviour
             aliveList.Add(playerTeam.GetComponent<Team>().player);
 
         return aliveList;
+    }
+
+    public AttackSkill NormalAttack()
+    {
+        AttackSkill normalAttack = new AttackSkill();
+        normalAttack.name = "Attack";
+        normalAttack.desc = "A normal physical attack";
+        normalAttack.cost = 0;
+        normalAttack.targets = 0;
+        normalAttack.power = 80;
+        normalAttack.type = 0;
+        normalAttack.accuracy = 98;
+        normalAttack.physical = true;
+        normalAttack.pierce = false;
+        normalAttack.support = new List<int>();
+        return normalAttack;
     }
 
     public void ExecuteMove(GameObject obj, NonPassiveSkill skill, List<GameObject> team)
@@ -633,6 +657,7 @@ public class GameManager : MonoBehaviour
         {
             resMod = 0;
             result = "NULL";
+            defender.stats.damageStatus = 5;
         }
 
         // Moves affected by guard/miss/critical
@@ -643,6 +668,7 @@ public class GameManager : MonoBehaviour
             {
                 result = "MISS";
                 resMod = 0;
+                defender.stats.damageStatus = 3;
             }
 
             // GUARDING
@@ -650,6 +676,7 @@ public class GameManager : MonoBehaviour
             {
                 resMod = 0.8f;
                 result = "GUARD";
+                defender.stats.damageStatus = 6;
             }
 
             // CRITICAL
@@ -659,6 +686,7 @@ public class GameManager : MonoBehaviour
                 {
                     resMod *= (1.5f * (1 + (attacker.passives[21] * 0.3f)));
                     result = "CRITICAL";
+                    defender.stats.damageStatus = 2;
                 }
                 else
                     resMod *= (1 - (attacker.passives[21] * 0.1f));
@@ -676,6 +704,7 @@ public class GameManager : MonoBehaviour
         else if (resMod == 2)
         {
             result = "WEAK";
+            defender.stats.damageStatus = 1;
 
             // Calculated OHKO if weak
             if (skill.ohko > 0 && CalculateInstaKill(skill, attacker, defender))
@@ -712,10 +741,10 @@ public class GameManager : MonoBehaviour
                 * PassiveIncreaser(attacker.passives[skill.type + 2])
                 + (1 * resMod);
 
-        if (result != "")
-            Debug.Log(affected.stats.name + " TOOK " + damage + " DAMAGE! " + result + "!");
-        else
-            Debug.Log(affected.stats.name + " TOOK " + damage + " DAMAGE!");
+        // if (result != "")
+            // Debug.Log(affected.stats.name + " TOOK " + damage + " DAMAGE! " + result + "!");
+        // else
+            // Debug.Log(affected.stats.name + " TOOK " + damage + " DAMAGE!");
 
         affected.stats.battleStats.hp -= (int) damage;
 
@@ -1042,13 +1071,15 @@ public class GameManager : MonoBehaviour
             // Nulls ailment (remember to check other possible ailments)
             if (resType == 3)
             {
-                Debug.Log(defender.stats.name + " nulls the ailment...");
+                // Debug.Log(defender.stats.name + " nulls the ailment...");
                 result = 2;
+                defender.stats.damageStatus = 5;
             }
             else if (resType == 0)
             {
                 InflictAilment(skill, obj, attacker, defender, i);
                 return 1;
+                defender.stats.damageStatus = 1;
             }
             else 
             {
@@ -1057,8 +1088,8 @@ public class GameManager : MonoBehaviour
                     InflictAilment(skill, obj, attacker, defender, i);
                     return 0;
                 }
-                else
-                    Debug.Log(defender.stats.name + " avoided the ailment...");
+                // else
+                    //Debug.Log(defender.stats.name + " avoided the ailment...");
             }
         }
 
@@ -1071,7 +1102,7 @@ public class GameManager : MonoBehaviour
 
     void InflictAilment(AilmentSkill skill, GameObject obj, ActorStats attacker, ActorStats defender, int ailmentIndex)
     {
-        Debug.Log(defender.stats.name + " was inflicted...");
+        // Debug.Log(defender.stats.name + " was inflicted...");
         PseudoSupport(skill, obj);
         CurseSiphoon(attacker);
         defender.ailment = new List<int>{ ailmentIndex + 1, 0, attacker.passives[17] };
@@ -1395,7 +1426,7 @@ public class GameManager : MonoBehaviour
         if (val != 5)
         {
             active = SetNextDemonActive(team);
-            while(active == null || active.GetComponent<ActorStats>().stats.battleStats.hp <= 0)
+            while(active.GetComponent<ActorStats>().stats.battleStats.hp <= 0)
                 active = SetNextDemonActive(team);
         }
 
@@ -1763,9 +1794,10 @@ public class GameManager : MonoBehaviour
     {
         foreach (Transform child in team.transform)
         {
+            child.gameObject.SetActive(true);
             child.GetComponent<ActorStats>().LoadCharacter();
 
-            if (child.GetSiblingIndex() >= 1 && child.GetSiblingIndex() < 4)
+            if (child.GetSiblingIndex() >= 1 && child.GetSiblingIndex() < 4 && firstRun)
                 team.GetComponent<Team>().activeDemons.Add(child.gameObject);
         }
 
@@ -1800,14 +1832,25 @@ public class GameManager : MonoBehaviour
         mainScreen.enabled = false;
         screen.enabled = false;
         gameOverScreen.enabled = true;
+        
+        for (int i = screen.transform.Find("PressTurns").childCount - 1; i >= 0; i--)
+        {
+            Destroy(screen.transform.Find("PressTurns").GetChild(i).gameObject);
+        }
 
         Text winText = gameOverScreen.transform.Find("WinText").GetComponent<Text>();
 
-        Team homeTeam;
+        Team homeTeam, awayTeam;
         if (playerTeam.GetComponent<Team>().homeTeam)
+        {
             homeTeam = playerTeam.GetComponent<Team>();
+            awayTeam = opponentTeam.GetComponent<Team>();
+        }
         else
+        {
             homeTeam = opponentTeam.GetComponent<Team>();
+            awayTeam = playerTeam.GetComponent<Team>();
+        }
 
         if(homeTeam.player.GetComponent<ActorStats>().stats.battleStats.hp > 0)
         {
@@ -1818,6 +1861,65 @@ public class GameManager : MonoBehaviour
         {
             winText.text = "Enemy Team Wins!";
             winText.color = Color.red;
+        }
+
+        PrintResultToOutputFile(homeTeam, awayTeam);
+        StartCoroutine(GameOverButtons());
+    }
+
+    IEnumerator GameOverButtons()
+    {
+        yield return new WaitForSeconds(3.0f);
+
+        if (autoRestart)
+            Reset();
+        else
+        {
+            gameOverScreen.transform.Find("RetryButton").gameObject.SetActive(true);
+            gameOverScreen.transform.Find("MainMenuButton").gameObject.SetActive(true);
+            gameOverScreen.transform.Find("AutoRetryToggle").gameObject.SetActive(true);
+        }
+    }
+
+    private void PrintResultToOutputFile(Team homeTeam, Team awayTeam)
+    {
+        int victorData = 1;
+        int playerTeammates = 0;
+        int enemyTeammates = 0;
+
+        if (homeTeam.player.GetComponent<ActorStats>().stats.battleStats.hp <= 0)
+            victorData = 0;
+
+        foreach (GameObject dem in homeTeam.activeDemons)
+        {
+            if (dem.GetComponent<ActorStats>().stats.battleStats.hp > 0)
+                playerTeammates += 1;
+        }
+
+        foreach (GameObject dem in awayTeam.activeDemons)
+        {
+            if (dem.GetComponent<ActorStats>().stats.battleStats.hp > 0)
+                enemyTeammates += 1;
+        }
+
+        string battleData = victorData.ToString() + " " + turn.ToString() + " " + playerTeammates.ToString() + " " + enemyTeammates.ToString();
+        string filePath = "D:/users/anorg/battle_results.txt";
+
+        if (File.Exists(filePath))
+        {
+            // Open the file in append mode
+            using (StreamWriter writer = new StreamWriter(filePath, true))
+            {
+                writer.WriteLine("\n" + battleData);
+            }
+        }
+        else
+        {
+            // Create a new file
+            using (StreamWriter writer = File.CreateText(filePath))
+            {
+                writer.WriteLine(battleData);
+            }
         }
     }
 
@@ -1867,6 +1969,15 @@ public class GameManager : MonoBehaviour
                 GetDemonPrefs(team.GetComponent<Team>().demons[i].GetComponent<ActorStats>(), "allyTeammate" + i);
             }
         }
+        else
+        {
+            GetDemonPrefs(team.GetComponent<Team>().player.GetComponent<ActorStats>(), "enemyPlayer");
+            
+            for (int i = 0; i < 3; ++i)
+            {
+                GetDemonPrefs(team.GetComponent<Team>().demons[i].GetComponent<ActorStats>(), "enemyTeammate" + i);
+            }
+        }
     }
 
     void GetDemonPrefs(ActorStats dem, string name)
@@ -1890,23 +2001,59 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void ReturnToTeamBuilder()
+    {
+        SceneManager.LoadScene("Teambuilder");
+    }
+
+    public void Reset() {
+        gameOverScreen.enabled = false;
+        LoadTeam(playerTeam);
+        LoadTeam(opponentTeam);
+
+        if (!playerTeam.GetComponent<Team>().homeTeam)
+        {
+            var temp = playerTeam;
+            playerTeam = opponentTeam;
+            opponentTeam = temp;
+        }
+        
+        active = playerTeam.GetComponent<Team>().player;
+        screen.enabled = true;
+        turn = 1;
+        activeIndex = 3;
+        screen.transform.Find("Turn").GetComponent<Text>().text = "Ally Turn";
+        screen.transform.Find("TurnNumber").GetComponent<Text>().text = turn.ToString();
+
+        foreach (Transform healthBar in healthBars)
+        {
+            healthBar.gameObject.SetActive(true);
+        }
+
+        UpdateName();
+        CreatePartyTurns();
+        FocusOnActive();
+
+        if (!playerTeam.GetComponent<Team>().ai)
+            mainScreen.enabled = true;
+        else
+            AITurn();
+    }
+
+    public void AutoRestart()
+    {
+        autoRestart = !autoRestart;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         if (SceneManager.GetActiveScene().name == "BattleScene")
         {
             ReadCompendiums();
-
             SetTeam();
-            LoadTeam(playerTeam);
-            LoadTeam(opponentTeam);
-
-            active = playerTeam.GetComponent<Team>().player;
-
-            UpdateName();
-            CreatePartyTurns();
-            FocusOnActive();
-
+            Reset();
+            firstRun = false;
         }
     }
 }
