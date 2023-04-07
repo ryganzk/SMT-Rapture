@@ -34,9 +34,9 @@ public class TeamBuilderControl : MonoBehaviour
             currDemon.GetComponent<ActorStats>().LoadCharacter();
 
             if (i == 0)
-                currDemon.GetComponent<ActorStats>().stats.dexID = 71;
+                currDemon.GetComponent<ActorStats>().stats.dexID = 74;
             else
-                currDemon.GetComponent<ActorStats>().stats.dexID = 92;
+                currDemon.GetComponent<ActorStats>().stats.dexID = 95;
         
             foreach (int skillID in currDemon.GetComponent<ActorStats>().stats.baseSkills)
             {
@@ -53,9 +53,9 @@ public class TeamBuilderControl : MonoBehaviour
             currDemon.GetComponent<ActorStats>().LoadCharacter();
 
             if (i == 0)
-                currDemon.GetComponent<ActorStats>().stats.dexID = 71;
+                currDemon.GetComponent<ActorStats>().stats.dexID = 74;
             else
-                currDemon.GetComponent<ActorStats>().stats.dexID = 92;
+                currDemon.GetComponent<ActorStats>().stats.dexID = 95;
 
             foreach (int skillID in currDemon.GetComponent<ActorStats>().stats.baseSkills)
             {
