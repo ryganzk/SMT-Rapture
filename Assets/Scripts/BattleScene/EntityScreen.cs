@@ -53,7 +53,8 @@ public class EntityScreen : MonoBehaviour
         }
         else
         {
-            CreateSelectButton(team.player);
+            if (team == gameManager.playerTeam.GetComponent<Team>() || gameManager.AliveTeammateCount(team.activeDemons) < 3)
+                CreateSelectButton(team.player);
 
             // Create selectors for all demons if you can only single target
             if (selectedSkill.targets == 0)

@@ -52,7 +52,7 @@ public class ResistText : MonoBehaviour
                 GetComponent<Image>().sprite = nullText;
                 break;
         }
-        yield return new WaitForSeconds(2.5f);
+        yield return new WaitForSeconds(0.8f);
         actor.GetComponent<ActorStats>().stats.damageStatus = 0;
         GetComponent<Image>().enabled = false;
     }

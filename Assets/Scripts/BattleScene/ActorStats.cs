@@ -21,6 +21,7 @@ public class ActorStats : MonoBehaviour
     [SerializeField] public List<int> defense = new List<int> { 0, 0 };
     [SerializeField] public List<int> accEvas = new List<int> { 0, 0 };
     [SerializeField] public List<int> passives = new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    [SerializeField] public AIFactors aiFactors;
 
     [System.Serializable]
     public class BaseStats
@@ -90,6 +91,23 @@ public class ActorStats : MonoBehaviour
         public int ailment;
         public int heal;
         public int support;
+    }
+
+    [System.Serializable]
+    public class AIFactors
+    {
+        // Move Factors
+        public float attackFactor;
+        public float ailmentFactor;
+        public float healFactor;
+        public float supportFactor;
+
+        // Target Factors (for healing/support moves)
+        public float selfFactor;
+        public float allyPlayerFactor;
+        public float enemyPlayerFactor;
+        public float allyTeamFactor;
+        public float enemyTeamFactor;
     }
 
     [System.Serializable]

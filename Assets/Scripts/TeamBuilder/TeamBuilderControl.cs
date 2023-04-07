@@ -92,6 +92,16 @@ public class TeamBuilderControl : MonoBehaviour
 
         }
 
+        PlayerPrefs.SetFloat("allyPlayerAIAttackFactor", 1.0f);
+        PlayerPrefs.SetFloat("allyPlayerAIAilmentFactor", 1.0f);
+        PlayerPrefs.SetFloat("allyPlayerAIHealFactor", 1.0f);
+        PlayerPrefs.SetFloat("allyPlayerAISupportFactor", 1.0f);
+        PlayerPrefs.SetFloat("allyPlayerAISelfFactor", 1.0f);
+        PlayerPrefs.SetFloat("allyPlayerAIAllyPlayerFactor", 1.0f);
+        PlayerPrefs.SetFloat("allyPlayerAIEnemyPlayerFactor", 1.0f);
+        PlayerPrefs.SetFloat("allyPlayerAIAllyTeamFactor", 1.0f);
+        PlayerPrefs.SetFloat("allyPlayerAIEnemyTeamFactor", 1.0f);
+
         for (int i = 0; i < 3; ++i)
         {
             var teammateStats = playerDemons.transform.GetChild(i + 1).GetComponent<ActorStats>();
@@ -112,6 +122,16 @@ public class TeamBuilderControl : MonoBehaviour
                 else
                     PlayerPrefs.SetInt("allyTeammate" + i + "Skill" + j, -1);
             }
+
+            PlayerPrefs.SetFloat("allyTeammate" + i + "AIAttackFactor", 1.0f);
+            PlayerPrefs.SetFloat("allyTeammate" + i + "AIAilmentFactor", 1.0f);
+            PlayerPrefs.SetFloat("allyTeammate" + i + "AIHealFactor", 1.0f);
+            PlayerPrefs.SetFloat("allyTeammate" + i + "AISupportFactor", 1.0f);
+            PlayerPrefs.SetFloat("allyTeammate" + i + "AISelfFactor", 1.0f);
+            PlayerPrefs.SetFloat("allyTeammate" + i + "AIAllyPlayerFactor", 1.0f);
+            PlayerPrefs.SetFloat("allyTeammate" + i + "AIEnemyPlayerFactor", 1.0f);
+            PlayerPrefs.SetFloat("allyTeammate" + i + "AIAllyTeamFactor", 1.0f);
+            PlayerPrefs.SetFloat("allyTeammate" + i + "AIEnemyTeamFactor", 1.0f);
         }
 
         // ENEMY TEAM
@@ -134,6 +154,16 @@ public class TeamBuilderControl : MonoBehaviour
                 PlayerPrefs.SetInt("enemyPlayerSkill" + i, -1);
         }
 
+        PlayerPrefs.SetFloat("enemyPlayerAIAttackFactor", 1.0f);
+        PlayerPrefs.SetFloat("enemyPlayerAIAilmentFactor", 1.0f);
+        PlayerPrefs.SetFloat("enemyPlayerAIHealFactor", 1.0f);
+        PlayerPrefs.SetFloat("enemyPlayerAISupportFactor", 1.0f);
+        PlayerPrefs.SetFloat("enemyPlayerAISelfFactor", 1.0f);
+        PlayerPrefs.SetFloat("enemyPlayerAIAllyPlayerFactor", 1.0f);
+        PlayerPrefs.SetFloat("enemyPlayerAIEnemyPlayerFactor", 1.0f);
+        PlayerPrefs.SetFloat("enemyPlayerAIAllyTeamFactor", 1.0f);
+        PlayerPrefs.SetFloat("enemyPlayerAIEnemyTeamFactor", 1.0f);
+
         for (int i = 0; i < 3; ++i)
         {
             var teammateStats = enemyDemons.transform.GetChild(i + 1).GetComponent<ActorStats>();
@@ -154,6 +184,16 @@ public class TeamBuilderControl : MonoBehaviour
                 else
                     PlayerPrefs.SetInt("enemyTeammate" + i + "Skill" + j, -1);
             }
+
+            PlayerPrefs.SetFloat("enemyTeammate" + i + "AIAttackFactor", 1.0f);
+            PlayerPrefs.SetFloat("enemyTeammate" + i + "AIAilmentFactor", 1.0f);
+            PlayerPrefs.SetFloat("enemyTeammate" + i + "AIHealFactor", 1.0f);
+            PlayerPrefs.SetFloat("enemyTeammate" + i + "AISupportFactor", 1.0f);
+            PlayerPrefs.SetFloat("enemyTeammate" + i + "AISelfFactor", 1.0f);
+            PlayerPrefs.SetFloat("enemyTeammate" + i + "AIAllyPlayerFactor", 1.0f);
+            PlayerPrefs.SetFloat("enemyTeammate" + i + "AIEnemyPlayerFactor", 1.0f);
+            PlayerPrefs.SetFloat("enemyTeammate" + i + "AIAllyTeamFactor", 1.0f);
+            PlayerPrefs.SetFloat("enemyTeammate" + i + "AIEnemyTeamFactor", 1.0f);
         }
 
         SceneManager.LoadScene("BattleScene");

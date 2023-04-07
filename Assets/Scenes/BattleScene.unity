@@ -4140,23 +4140,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89617628ebe657a42b18611ed863bcf8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  aiType: 0
-  attackFactor: 1.7
-  ailmentFactor: 0.5
-  healFactor: 0.3
-  supportFactor: 1.2
+  aiType: 1
   gameManager: {fileID: 1004630146}
-  selfFactor: 0
-  teamFactor: 0
-  scoutWeaknesses: 0
-  exploitWeaknesses: 0
-  defeatWeakEnemies: 0
-  inflictAilments: 0
-  healTeammates: 0
-  cureTeammates: 0
-  applyCharges: 0
-  buffTeammates: 0
-  debuffEnemies: 0
+  useTeamFactors: 0
+  attackFactor: 1.5
+  ailmentFactor: 0.6
+  healFactor: 0.9
+  supportFactor: 1.2
+  selfFactor: 0.2
+  allyPlayerFactor: 2
+  enemyPlayerFactor: 1.6
+  allyTeamFactor: 0.8
+  enemyTeamFactor: 1.1
 --- !u!1 &1581892307
 GameObject:
   m_ObjectHideFlags: 0
@@ -5591,22 +5586,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   aiType: 0
-  attackFactor: 1.7
-  ailmentFactor: 0.5
-  healFactor: 0.3
-  supportFactor: 1.2
   gameManager: {fileID: 1004630146}
+  useTeamFactors: 0
+  attackFactor: 0
+  ailmentFactor: 0
+  healFactor: 0
+  supportFactor: 0
   selfFactor: 0
-  teamFactor: 0
-  scoutWeaknesses: 0
-  exploitWeaknesses: 0
-  defeatWeakEnemies: 0
-  inflictAilments: 0
-  healTeammates: 0
-  cureTeammates: 0
-  applyCharges: 0
-  buffTeammates: 0
-  debuffEnemies: 0
+  allyPlayerFactor: 0
+  enemyPlayerFactor: 0
+  allyTeamFactor: 0
+  enemyTeamFactor: 0
 --- !u!1 &1996687236
 GameObject:
   m_ObjectHideFlags: 0

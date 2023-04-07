@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
     private int activeIndex = 3;
     private bool firstRun = true;
     private bool autoRestart = false;
+    private float timeDelay = 1.5f;
 
     public Camera cam;
     public GameObject active;
@@ -80,10 +81,11 @@ public class GameManager : MonoBehaviour
         public bool pierce;
         public int ohko;
         public int critBonus;
+        public int critPower;
     }
 
     [System.Serializable]
-    public class RecoverySkill : NonPassiveSkill
+    public class RecoverySkill : PseudoSupportSkill
     {
         public int recoverAmnt;
         public int recoverPrct;
@@ -473,6 +475,20 @@ public class GameManager : MonoBehaviour
         return aliveList;
     }
 
+    public int AliveTeammateCount(List<GameObject> objs)
+    {
+        int aliveDemons = 0;
+
+        // Adds a demon to target if they exit in the list
+        foreach(GameObject obj in objs)
+        {
+            if (obj != null && obj.GetComponent<ActorStats>().stats.battleStats.hp > 0)
+                ++aliveDemons;
+        }
+        
+        return aliveDemons;
+    }
+
     // ONLY FOR USE WHEN SWITCHING TURNS
     public List<GameObject> AliveDemons(List<GameObject> objs, bool includePlayer)
     {
@@ -651,6 +667,7 @@ public class GameManager : MonoBehaviour
         float chargeVal = 1;
         var affected = defender;
         string result = "";
+        int skillPow = skill.power;
 
         // PROTECTIVE BARRIER
         if (resMod == 0 || defender.protective == skill.type + 3)
@@ -687,6 +704,9 @@ public class GameManager : MonoBehaviour
                     resMod *= (1.5f * (1 + (attacker.passives[21] * 0.3f)));
                     result = "CRITICAL";
                     defender.stats.damageStatus = 2;
+
+                    if (skill.critPower != 0)
+                        skillPow = skill.critPower;
                 }
                 else
                     resMod *= (1 - (attacker.passives[21] * 0.1f));
@@ -731,7 +751,7 @@ public class GameManager : MonoBehaviour
 
         var damage = Math.Pow(demPower, 2)
                 / (defender.stats.baseStats.vitality * 1.5f)
-                * (1 + (skill.power / 100f))
+                * (1 + (skillPow / 100f))
                 * resMod
                 * ((UnityEngine.Random.Range(0f, 1f) / 3) + 1)
                 * CalculateBattleBuff(attacker, 0)
@@ -1247,7 +1267,7 @@ public class GameManager : MonoBehaviour
                     BuffHelper(recipient.attack, skill, caster, recipient);
                     break;
                 case 1:
-                    BuffHelper(recipient.attack, skill, caster, recipient);
+                    BuffHelper(recipient.defense, skill, caster, recipient);
                     break;
                 case 2:
                     BuffHelper(recipient.accEvas, skill, caster, recipient);
@@ -1442,7 +1462,7 @@ public class GameManager : MonoBehaviour
                 flavorText.GetComponent<Text>().text = demon.stats.name + " Recoved From Its Status Condition!";
                 demon.ailment = new List<int>{ 0, 0, 0 };
 
-                yield return new WaitForSeconds(3.0f);
+                yield return new WaitForSeconds(timeDelay);
             }
         }
 
@@ -1737,7 +1757,7 @@ public class GameManager : MonoBehaviour
     {
         mainScreen.enabled = false;
         var demon = active.GetComponent<ActorStats>();
-        yield return new WaitForSeconds(3.0f);
+        yield return new WaitForSeconds(timeDelay);
 
         UpdateIdles();
 
@@ -1753,7 +1773,7 @@ public class GameManager : MonoBehaviour
                 demon.ailment = new List<int>(){ 0, 0, 0 };
             }
 
-            yield return new WaitForSeconds(3.0f);
+            yield return new WaitForSeconds(timeDelay);
             DemonIdleUpdate(active);
         }
 
@@ -1773,7 +1793,7 @@ public class GameManager : MonoBehaviour
             switchText.GetComponent<Text>().color = Color.red;
         }
         switchText.SetActive(true);
-        yield return new WaitForSeconds(3.0f);
+        yield return new WaitForSeconds(timeDelay);
 
         switchText.SetActive(false);
         flavorText.SetActive(true);
@@ -1828,7 +1848,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator GameOver()
     {
-        yield return new WaitForSeconds(3.0f);
+        yield return new WaitForSeconds(timeDelay);
         mainScreen.enabled = false;
         screen.enabled = false;
         gameOverScreen.enabled = true;
@@ -1869,7 +1889,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator GameOverButtons()
     {
-        yield return new WaitForSeconds(3.0f);
+        yield return new WaitForSeconds(timeDelay);
 
         if (autoRestart)
             Reset();
@@ -1886,6 +1906,7 @@ public class GameManager : MonoBehaviour
         int victorData = 1;
         int playerTeammates = 0;
         int enemyTeammates = 0;
+        int fitnessVal = 0;
 
         if (homeTeam.player.GetComponent<ActorStats>().stats.battleStats.hp <= 0)
             victorData = 0;
@@ -1902,7 +1923,10 @@ public class GameManager : MonoBehaviour
                 enemyTeammates += 1;
         }
 
-        string battleData = victorData.ToString() + " " + turn.ToString() + " " + playerTeammates.ToString() + " " + enemyTeammates.ToString();
+        fitnessVal = CalculateAllyFitness(victorData, playerTeammates, enemyTeammates);
+        //fitnessVal = CalculateEnemyFitness(victorData, playerTeammates, enemyTeammates);
+
+        string battleData = victorData.ToString() + " " + turn.ToString() + " " + playerTeammates.ToString() + " " + enemyTeammates.ToString()+ " " + fitnessVal.ToString();
         string filePath = "D:/users/anorg/battle_results.txt";
 
         if (File.Exists(filePath))
@@ -1910,7 +1934,7 @@ public class GameManager : MonoBehaviour
             // Open the file in append mode
             using (StreamWriter writer = new StreamWriter(filePath, true))
             {
-                writer.WriteLine("\n" + battleData);
+                writer.WriteLine(battleData);
             }
         }
         else
@@ -1921,6 +1945,45 @@ public class GameManager : MonoBehaviour
                 writer.WriteLine(battleData);
             }
         }
+    }
+
+    private int CalculateAllyFitness(int victorData, int playerTeammates, int enemyTeammates)
+    {
+        return (victorData * 1000) - (turn * 10) + (playerTeammates * 25) - (enemyTeammates * 10) + GetTeamHP(playerTeam.GetComponent<Team>()) - GetTeamHP(opponentTeam.GetComponent<Team>()) + GetTeamMP(playerTeam.GetComponent<Team>());
+    }
+
+    private int CalculateEnemyFitness(int victorData, int playerTeammates, int enemyTeammates)
+    {
+        if (victorData == 1)
+            victorData = 0;
+        else
+            victorData = 1;
+
+        return (victorData * 1000) - (turn * 10) + (enemyTeammates * 25) - (playerTeammates * 10) + GetTeamHP(opponentTeam.GetComponent<Team>()) - GetTeamHP(playerTeam.GetComponent<Team>()) + GetTeamMP(opponentTeam.GetComponent<Team>());
+    }
+
+    private int GetTeamHP(Team team)
+    {
+        int endingHP = team.player.GetComponent<ActorStats>().stats.battleStats.hp;
+        int totalHP = team.player.GetComponent<ActorStats>().stats.baseStats.hp;
+        foreach (GameObject obj in team.demons)
+        {
+            endingHP += obj.GetComponent<ActorStats>().stats.battleStats.hp;
+            totalHP += obj.GetComponent<ActorStats>().stats.baseStats.hp;
+        }
+        return (endingHP / totalHP) * 100;
+    }
+
+    private int GetTeamMP(Team team)
+    {
+        int endingMP = team.player.GetComponent<ActorStats>().stats.battleStats.mp;
+        int totalMP = team.player.GetComponent<ActorStats>().stats.baseStats.mp;
+        foreach (GameObject obj in team.demons)
+        {
+            endingMP += obj.GetComponent<ActorStats>().stats.battleStats.mp;
+            totalMP += obj.GetComponent<ActorStats>().stats.baseStats.mp;
+        }
+        return (endingMP / totalMP) * 25;
     }
 
     private void SetTeam()
@@ -1999,6 +2062,16 @@ public class GameManager : MonoBehaviour
             else if (skillID != -1)
                 dem.stats.skills.Add(skillCompendium[skillID]);
         }
+
+        dem.aiFactors.attackFactor = PlayerPrefs.GetFloat(name + "AIAttackFactor");
+        dem.aiFactors.ailmentFactor = PlayerPrefs.GetFloat(name + "AIAilmentFactor");
+        dem.aiFactors.healFactor = PlayerPrefs.GetFloat(name + "AIHealFactor");
+        dem.aiFactors.supportFactor = PlayerPrefs.GetFloat(name + "AISupportFactor");
+        dem.aiFactors.selfFactor = PlayerPrefs.GetFloat(name + "AISelfFactor");
+        dem.aiFactors.allyPlayerFactor = PlayerPrefs.GetFloat(name + "AIAllyPlayerFactor");
+        dem.aiFactors.enemyPlayerFactor = PlayerPrefs.GetFloat(name + "AIEnemyPlayerFactor");
+        dem.aiFactors.allyTeamFactor = PlayerPrefs.GetFloat(name + "AIAllyTeamFactor");
+        dem.aiFactors.enemyTeamFactor = PlayerPrefs.GetFloat(name + "AIEnemyTeamFactor");
     }
 
     public void ReturnToTeamBuilder()
@@ -2034,6 +2107,7 @@ public class GameManager : MonoBehaviour
         CreatePartyTurns();
         FocusOnActive();
 
+        //StartCoroutine(SwitchDelay(playerTeam.GetComponent<Team>().homeTeam));
         if (!playerTeam.GetComponent<Team>().ai)
             mainScreen.enabled = true;
         else
