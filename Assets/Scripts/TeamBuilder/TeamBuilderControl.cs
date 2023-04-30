@@ -196,6 +196,7 @@ public class TeamBuilderControl : MonoBehaviour
             PlayerPrefs.SetFloat("enemyTeammate" + i + "AIEnemyTeamFactor", 1.0f);
         }
 
+        //gameManager.enabled = false;
         SceneManager.LoadScene("BattleScene");
     }
 

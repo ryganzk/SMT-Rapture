@@ -1657,6 +1657,11 @@ public class GameManager : MonoBehaviour
         pressTurn.transform.SetParent(pressTurnPane.transform);
         pressTurn.color = glow;
         var rectTransform = pressTurn.GetComponent<RectTransform>();
+
+        
+        rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 100f); // Width
+        rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 100f); // Height
+
         rectTransform.anchoredPosition = new Vector2(1, 0);
         rectTransform.position = new Vector3(1830 - (100 * offset), 990, 0);
     }
@@ -2119,15 +2124,28 @@ public class GameManager : MonoBehaviour
         autoRestart = !autoRestart;
     }
 
+    public void SetDefaultSkybox()
+    {
+        RenderSettings.skybox = null;
+        RenderSettings.sun = null;
+        DynamicGI.UpdateEnvironment();
+    }
+
+    IEnumerator BattleStart()
+    {
+        yield return new WaitForSeconds(0.01f);
+        ReadCompendiums();
+        SetTeam();
+        Reset();
+        firstRun = false;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         if (SceneManager.GetActiveScene().name == "BattleScene")
         {
-            ReadCompendiums();
-            SetTeam();
-            Reset();
-            firstRun = false;
+            StartCoroutine(BattleStart());
         }
     }
 }

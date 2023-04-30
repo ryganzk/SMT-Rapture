@@ -31,6 +31,22 @@ public class SkillScreen : MonoBehaviour
             var newSkill = Instantiate(skillButton, Vector3.zero, Quaternion.identity) as Button;
             newSkill.transform.SetParent(this.transform);
             var rectTransform = newSkill.GetComponent<RectTransform>();
+
+            // Set the anchor points
+            //rectTransform.anchorMin = new Vector2(0, 1); // Top-left corner
+            //rectTransform.anchorMax = new Vector2(0, 1); // Top-left corner
+            // Set the pivot point
+            //rectTransform.pivot = new Vector2(0.5f, 0.5f); // Center
+
+
+            // Set the width and height of the RectTransform
+            //rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 100f); // Width
+            //rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 100f); // Height
+
+            //rectTransform.anchoredPosition = new Vector2(0, 0); // Set position
+            //rectTransform.rotation = Quaternion.identity; // Set rotation
+            //rectTransform.localScale = Vector3.one; // Set scale
+
             rectTransform.anchoredPosition = new Vector2(1, 0);
             rectTransform.position = new Vector3(1690, 60 + (60 * (i + 1)), 0);
 

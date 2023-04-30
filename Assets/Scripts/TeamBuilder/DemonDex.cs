@@ -15,17 +15,13 @@ public class DemonDex : MonoBehaviour
 
     private void LoadDemons()
     {
-        string[] prefabPaths = AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/Prefabs/Actors" });
-
+        GameObject[] prefabs = Resources.LoadAll<GameObject>("Prefabs/Actors");
+        
         // Load each prefab and add it to the list
-        foreach (string path in prefabPaths)
+        foreach (GameObject prefab in prefabs)
         {
-            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(path));
-            if (prefab != null)
-            {
-                demonDex.Add(prefab);
-                demonNames.Add(char.ToUpper(prefab.name[0]) + prefab.name.Substring(1));
-            }
+            demonDex.Add(prefab);
+            demonNames.Add(char.ToUpper(prefab.name[0]) + prefab.name.Substring(1));
         }
     }
 
