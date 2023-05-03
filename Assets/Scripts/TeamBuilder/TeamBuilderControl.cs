@@ -22,6 +22,9 @@ public class TeamBuilderControl : MonoBehaviour
     public GameObject demonDex;
     public GameObject exportErrorText;
 
+    private const int NAHOBINO_INDEX = 90;
+    private const int SLIME_INDEX = 117;
+
     public void Start()
     {
         Directory.CreateDirectory(Application.persistentDataPath + "/teams/");
@@ -34,9 +37,9 @@ public class TeamBuilderControl : MonoBehaviour
             currDemon.GetComponent<ActorStats>().LoadCharacter();
 
             if (i == 0)
-                currDemon.GetComponent<ActorStats>().stats.dexID = 74;
+                currDemon.GetComponent<ActorStats>().stats.dexID = NAHOBINO_INDEX;
             else
-                currDemon.GetComponent<ActorStats>().stats.dexID = 95;
+                currDemon.GetComponent<ActorStats>().stats.dexID = SLIME_INDEX;
         
             foreach (int skillID in currDemon.GetComponent<ActorStats>().stats.baseSkills)
             {

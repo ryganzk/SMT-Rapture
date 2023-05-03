@@ -2241,7 +2241,7 @@ Transform:
   m_GameObject: {fileID: 5265082517922362160}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_Children:
   - {fileID: 8282074803425929270}
   - {fileID: 443217360344622872}
@@ -2286,6 +2286,7 @@ MonoBehaviour:
     race: 0
     level: 0
     demID: 0
+    dexID: 0
     religion: 
     alignment: 
     baseStats:
@@ -2329,6 +2330,7 @@ MonoBehaviour:
       ailment: 0
       heal: 0
       support: 0
+    damageStatus: 0
   faceSprite: {fileID: -3650391971827573766, guid: de1b0137fff4cfb459c20a5ffc4921a4, type: 3}
   guard: 0
   ailment: 000000000000000000000000
@@ -2340,6 +2342,16 @@ MonoBehaviour:
   defense: 0000000000000000
   accEvas: 0000000000000000
   passives: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  aiFactors:
+    attackFactor: 0
+    ailmentFactor: 0
+    healFactor: 0
+    supportFactor: 0
+    selfFactor: 0
+    allyPlayerFactor: 0
+    enemyPlayerFactor: 0
+    allyTeamFactor: 0
+    enemyTeamFactor: 0
   references:
     version: 1
 --- !u!54 &3783741380767252989
